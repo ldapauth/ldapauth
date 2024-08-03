@@ -1,0 +1,7 @@
+基于OpenLDAP企业级认证平台(EIAM)，用于管理企业组织架构、员工账号、身份认证、应用访问，帮助整合本地或云端的业务系统及第三方 SaaS 系统的所有身份，实现一个账号登录访问所有应用。支持OAuth2.x、OIDC、SAML2.0、JWT、CAS等SSO标准协议。
+
+
+Based on OpenLDAP Enterprise Authentication Platform (EIAM), it is used to manage enterprise organizational structure, employee accounts, identity authentication, and application access, helping to integrate all identities of local or cloud based business systems and third-party SaaS systems, and enabling one account login to access all applications. Support SSO standard protocols such as OAuth2. x, OIDC, SAML2.0, JWT, CAS, etc.
+
+
+Copyright © 2024LdapAuth. All rights reserved. WebSite http://ldapauth.com/

@@ -1,0 +1,14 @@
+application:
+  title: jwt-demo
+
+server:
+  port: 1003
+
+jwt:
+  server: http://localhost:6501/ldap-api/auth/jwt/1811571685842096130
+  #是否签名
+  isSign: true
+  #签名kid
+  kid: 1811571685842096130_sig
+  #JWT参数名称
+  tokenName: jwt

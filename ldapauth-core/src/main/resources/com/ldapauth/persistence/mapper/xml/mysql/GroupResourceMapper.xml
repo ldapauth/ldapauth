@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ldapauth.persistence.mapper.GroupResourceMapper">
+
+	<select id="fetch" parameterType="com.ldapauth.pojo.dto.GroupResourceQueryDTO" resultType="com.ldapauth.pojo.entity.Resource">
+		select r.* from lda_group_resources gr
+		inner join lda_group g on gr.group_id = g.id
+		inner join lda_resources r on gr.resource_id = r.id
+		where gr.group_id = #{query.groupId}
+		<if test="query.name != null and query.name != ''">
+			and r.name like concat('%',#{query.name},'%')
+		</if>
+		<if test="query.parentId != null">
+			and r.parent_id = #{query.parentId}
+		</if>
+		<if test="query.classify != null and query.classify != ''">
+			and r.classify = #{query.classify}
+		</if>
+		<if test="query.resAction != null and query.resAction != ''">
+			and r.res_action = #{query.resAction}
+		</if>
+	</select>
+
+	<select id="selectResourceByMemberId" parameterType="Long" resultType="com.ldapauth.pojo.entity.Resource">
+		select r.* from lda_resources r where r.id in (
+			select resource_id from lda_group_resources where group_id in(
+				select id from lda_group where ( id in (
+					select group_id from lda_group_member where member_id = #{memberId}
+				) and status = 0 ) or id = 2
+			)
+		)
+		and r.status = 0
+		order by r.sort_order asc
+	</select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<parent>
+		<artifactId>ldapauth</artifactId>
+		<groupId>ldapauth.com</groupId>
+		<version>${ldapauth.version}</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>ldapauth-authentications</artifactId>
+	<packaging>pom</packaging>
+	<properties>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<modules>
+		<module>ldapauth-authentication-captcha</module>
+		<module>ldapauth-authentication-core</module>
+		<module>ldapauth-authentication-ip2region</module>
+		<module>ldapauth-authentication-otp</module>
+		<module>ldapauth-authentication-provider</module>
+		<!--<module>ldapauth-authentication-social</module>-->
+	</modules>
+</project>

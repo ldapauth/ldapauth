@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ldapauth.persistence.mapper.GroupMemberMapper">
+
+	<select id="selectAuthList" parameterType="com.ldapauth.pojo.dto.GroupMemberQueryDTO" resultType="com.ldapauth.pojo.entity.UserInfo">
+		select u.* from lda_group_member gm
+		inner join lda_group g on gm.group_id = g.id
+		inner join lda_userinfo u on gm.member_id = u.id
+		where gm.group_id = #{query.groupId}
+		<if test="query.username != null and query.username != ''">
+			and u.username like concat('%',#{query.username},'%')
+		</if>
+		<if test="query.displayName != null and query.displayName != ''">
+			and u.display_name like concat('%',#{query.displayName},'%')
+		</if>
+		<if test="query.mobile != null and query.mobile != ''">
+			and u.mobile like concat('%',#{query.mobile},'%')
+		</if>
+	</select>
+
+
+	<select id="selectNotAuthList" parameterType="com.ldapauth.pojo.dto.GroupMemberQueryDTO" resultType="com.ldapauth.pojo.entity.UserInfo">
+		select u.* from lda_userinfo u
+		    where u.id not in(
+			 select member_id from lda_group_member where group_id = #{query.groupId}
+		    )
+		    and u.status  = 0
+		<if test="query.username != null and query.username != ''">
+			and u.username like concat('%',#{query.username},'%')
+		</if>
+		<if test="query.displayName != null and query.displayName != ''">
+			and u.display_name like concat('%',#{query.displayName},'%')
+		</if>
+		<if test="query.mobile != null and query.mobile != ''">
+			and u.mobile like concat('%',#{query.mobile},'%')
+		</if>
+	</select>
+</mapper>

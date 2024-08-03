@@ -1,0 +1,17 @@
+com.ldapauth.autoconfigure.ApplicationAutoConfiguration
+com.ldapauth.autoconfigure.KaptchaAutoConfiguration
+com.ldapauth.autoconfigure.KeyStoreAutoConfiguration
+com.ldapauth.autoconfigure.MvcAutoConfiguration
+com.ldapauth.autoconfigure.JwtAuthnAutoConfiguration
+com.ldapauth.autoconfigure.RedisAutoConfiguration
+com.ldapauth.autoconfigure.AuthnProviderAutoConfiguration
+com.ldapauth.autoconfigure.OneTimePasswordAutoConfiguration
+com.ldapauth.autoconfigure.SessionAutoConfiguration
+com.ldapauth.autoconfigure.TokenAutoConfiguration
+com.ldapauth.autoconfigure.IpRegionAutoConfiguration
+com.ldapauth.autoconfigure.SwaggerConfig
+com.ldapauth.autoconfigure.LdapAuthMgtConfig
+com.ldapauth.autoconfigure.LdapAuthMgtMvcConfig
+com.ldapauth.autoconfigure.CasAutoConfiguration
+com.ldapauth.autoconfigure.Saml20AutoConfiguration
+com.ldapauth.autoconfigure.Oauth20AutoConfiguration

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ldapauth.persistence.mapper.GroupAppsMapper">
+
+	<select id="fetchList" parameterType="com.ldapauth.pojo.dto.GroupAppsQueryDTO" resultType="com.ldapauth.pojo.vo.GroupAppsVO">
+		select
+			lgp.id,
+			g.id as group_id,
+			g.name as group_name,
+			lap.id as app_id,
+			lap.app_name,
+			lgp.create_by,
+			lgp.create_time
+		from lda_group_apps lgp
+			left join lda_group g on lgp.group_id = g.id
+			left join lda_apps lap on lgp.app_id = lap.id
+			where 1 = 1
+		<if test="query.groupName != null and query.groupName != ''">
+			and g.name like concat('%',#{query.groupName},'%')
+		</if>
+		<if test="query.appName != null and query.appName != ''">
+			and lap.app_name like concat('%',#{query.appName},'%')
+		</if>
+	</select>
+
+
+</mapper>

@@ -1,0 +1,17 @@
+application:
+  title: oauth-demo
+
+server:
+  port: 1004
+
+oauth:
+  server: http://localhost:6501/ldap-api
+  redirect_uri: http://127.0.0.1:1004/oauth/sso
+  clientid: MTgxMzg2OTgxOTMxMTgzMzA5MA
+  clientsecret: EEEed29301094457cF5B1EF96FeBCAE1
+  login-uri: ${oauth.server}/auth/oauth/v20/authorize?client_id=${oauth.clientid}&response_type=code&state=test&redirect_uri=${oauth.redirect_uri}
+  token-uri: ${oauth.server}/auth/oauth/v20/token?client_id=${oauth.clientid}&grant_type=authorization_code&client_secret=${oauth.clientsecret}&redirect_uri=${oauth.redirect_uri}&code=%s
+  userinfo-uri: ${oauth.server}/api/oauth/v20/me?access_token=%s
+
+
+

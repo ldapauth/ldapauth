@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>ldapauth.com</groupId>
+		<artifactId>ldapauth</artifactId>
+		<version>${ldapauth.version}</version>
+	</parent>
+
+	<artifactId>ldapauth-synchronizers</artifactId>
+	<packaging>pom</packaging>
+	<properties>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<modules>
+		<module>ldapauth-synchronizer</module>
+		<module>ldapauth-synchronizer-dingtalk</module>
+		<module>ldapauth-synchronizer-feishu</module>
+		<module>ldapauth-synchronizer-ldap</module>
+		<module>ldapauth-synchronizer-workweixin</module>
+	</modules>
+</project>

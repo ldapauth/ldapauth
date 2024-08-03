@@ -1,0 +1,19 @@
+application:
+  title: oidc-demo
+
+server:
+  port: 1005
+
+oidc:
+  server: http://localhost:6501/ldap-api
+  redirect_uri: http://127.0.0.1:1005/oidc/sso
+  clientid: MTgxMzg5NTcwNzI1NjU5MDMzOA
+  clientsecret: 366D5c2469E458cACb7A991ED1b68Fa7
+  login-uri: ${oidc.server}/auth/oauth/v20/authorize?client_id=${oidc.clientid}&response_type=code&state=test&redirect_uri=${oidc.redirect_uri}
+  token-uri: ${oidc.server}/auth/oauth/v20/token?client_id=${oidc.clientid}&grant_type=authorization_code&client_secret=${oidc.clientsecret}&redirect_uri=${oidc.redirect_uri}&code=%s
+  userinfo-uri: ${oidc.server}/api/oauth/v20/me?access_token=%s
+  #idtoken_kid
+  kid: 1813895707516637185_sig
+
+
+

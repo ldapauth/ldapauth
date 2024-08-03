@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ldapauth.persistence.mapper.UserInfoMapper">
+
+
+	<select id="selectUserGroup" parameterType="Long" resultType="com.ldapauth.pojo.entity.Group">
+		select g.* from lda_group_member gm inner join lda_group g on gm.group_id = g.id
+		where gm.member_id = #{userId}
+	</select>
+
+	<select id="checkInfoByMobile" parameterType="string" resultType="com.ldapauth.pojo.entity.UserInfo">
+		select id
+		from `lda_userinfo`
+		where mobile = #{mobile}
+	</select>
+
+	<select id="checkInfoByEmail" parameterType="string" resultType="com.ldapauth.pojo.entity.UserInfo">
+		select id
+		from `lda_userinfo`
+		where email = #{email}
+	</select>
+
+	<select id="checkInfoByUsername" parameterType="string" resultType="com.ldapauth.pojo.entity.UserInfo">
+		select id
+		from `lda_userinfo`
+		where username = #{username}
+	</select>
+
+
+	<select id="selectUserPage" parameterType="map" resultType="com.ldapauth.pojo.vo.UserInfoPageVo">
+		select u.*, o.name_path as department_name_path
+		    from lda_userinfo u
+		left join lda_organization o
+		on u.department_id = o.id
+		<where>
+			<if test="mapParams.username != null and mapParams.username != ''">
+				u.username = #{mapParams.username}
+			</if>
+			<if test="mapParams.displayName != null and mapParams.displayName != ''">
+				AND u.display_name = #{mapParams.displayName}
+			</if>
+			<if test="mapParams.mobile != null and mapParams.mobile != ''">
+				AND u.mobile = #{mapParams.mobile}
+			</if>
+			<if test="mapParams.departmentId != null and mapParams.departmentId != ''">
+				AND u.department_id = #{mapParams.departmentId}
+			</if>
+		</where>
+		ORDER BY u.create_time DESC
+	</select>
+</mapper>

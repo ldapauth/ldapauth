@@ -1,0 +1,15 @@
+application:
+  title: cas-demo
+
+server:
+  port: 1001
+
+cas:
+  #cas客户端服务地址
+  client-host-url: http://127.0.0.1:1001
+  #cas认证中心地址
+  server-url-prefix: http://localhost:6501/ldap-api/auth/cas
+  #cas认证中心登录地址
+  server-login-url: http://localhost:6501/ldap-api/auth/cas/login
+  #Ticket校验器使用Cas30ProxyReceivingTicketValidationFilter，支持cas和cas3
+  validation-type: cas

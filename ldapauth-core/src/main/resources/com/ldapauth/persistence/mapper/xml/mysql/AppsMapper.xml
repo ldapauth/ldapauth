@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ldapauth.persistence.mapper.AppsMapper">
+
+	<select id="myApps" parameterType="Long" resultType="com.ldapauth.pojo.entity.apps.Apps">
+		select
+			app.*
+		from lda_apps app
+			where id in (
+				select app_id from lda_group_apps where group_id in (
+					select id from lda_group where ( id in (
+						select group_id from lda_group_member where member_id = #{userId}
+					) and status = 0) or id = 2
+				)
+			)
+			and app.status = 0
+	</select>
+
+</mapper>

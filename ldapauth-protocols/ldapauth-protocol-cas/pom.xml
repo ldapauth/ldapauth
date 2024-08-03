@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>ldapauth.com</groupId>
+		<artifactId>ldapauth-protocols</artifactId>
+		<version>${ldapauth.version}</version>
+	</parent>
+
+	<artifactId>ldapauth-protocol-cas</artifactId>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>ldapauth.com</groupId>
+			<artifactId>ldapauth-common</artifactId>
+			<version>${ldapauth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ldapauth.com</groupId>
+			<artifactId>ldapauth-core</artifactId>
+			<version>${ldapauth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ldapauth.com</groupId>
+			<artifactId>ldapauth-protocol-authorize</artifactId>
+			<version>${ldapauth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ldapauth.com</groupId>
+			<artifactId>ldapauth-authentication-core</artifactId>
+			<version>${ldapauth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ldapauth.com</groupId>
+			<artifactId>ldapauth-authentication-provider</artifactId>
+			<version>${ldapauth.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jasig.cas.client</groupId>
+			<artifactId>cas-client-core</artifactId>
+			<version>3.6.1</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>
