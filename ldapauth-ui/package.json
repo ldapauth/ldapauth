@@ -1,6 +1,6 @@
 {
   "name": "ldapauth",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "LdapAuth",
   "author": "Shibl",
   "license": "MIT",

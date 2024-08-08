@@ -25,7 +25,7 @@
 
 	<properties>
 		<!--project version-->
-		<ldapauth.version>1.0.1</ldapauth.version>
+		<ldapauth.version>1.0.0</ldapauth.version>
 		<!--aliyun dysmsapi-->
 		<dysmsapi.version>2.2.1</dysmsapi.version>
 		<!--redis-->
