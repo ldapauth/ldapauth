@@ -1,20 +1,36 @@
-## 系统简介
+## 项目介绍
 
 基于OpenLDAP企业级认证平台(EIAM)，用于管理企业组织架构、员工账号、身份认证、应用访问，帮助整合本地或云端的业务系统及第三方 SaaS 系统的所有身份，实现一个账号登录访问所有应用。支持OAuth2.x、OIDC、SAML2.0、JWT、CAS等SSO标准协议。
 
-![](login.png)
+官网地址：http://ldapauth.com
 
-## 官方地址
+官网邮箱：contact@ldapauth.com
 
-<a href="http://ldapauth.com" target="_blank">http://ldapauth.com</a>
+付费服务支持或商务合作：
 
-## 官方联系邮箱
 
-contact@ldapauth.com
+<img src="weixin.jpg" width="200px" />
 
-## 官方联系微信
+--------------------------
 
-<img src="weixin.jpg" style="width: 250px">
+<div align="center">⭐️ 如果你喜欢 LdapAuth，请给它一个 Star，您的支持将是我们前行的动力。</div>
+
+--------------------------
+
+## 核心特性
+
++ 基于OpenLDAP企业级认证平台(EIAM)，用于管理企业组织架构、员工账号、身份认证、应用访问统一管理。
++ 支持企业微信,钉钉,飞书,OpenLDAP等开箱即用数据源。
++ 支持图片动态验证码、短信验证码、Google/Microsoft Authenticator/FreeOTP/支持TOTP或者HOTP，保证用户认证安全可靠。
++ 支持微信、钉钉、飞书QQ等社交认证集成，使企业具有快速纳入互联网化认证能力。
++ 支持 `SAML2`，`OAuth2`，`OIDC`，`CAS`，`JWT`等认证协议及机制，实现单点登录功能。
++ 完善的安全审计，详尽记录每一次用户行为，使每一步操作有据可循，实时记录企业信息安全状况，精准识别企业异常访问和潜在威胁的源头。
+
+## 技术架构
+
+- **后端**：[Spring Boot](https://spring.io/projects/spring-boot/)
+- **前端**：[Vue.js](https://cn.vuejs.org/) 、[Element UI](https://element-plus.org/zh-CN/guide/design.html)
+- **中间件**：[MySQL](https://www.mysql.com/) 、[Redis](https://redis.io/)
 
 ## 单点登录
 单点登录(Single Sign On)简称为SSO
@@ -49,126 +65,5 @@ LDAP 目录的条目（entry）由属性（attribute）的一个聚集组成，�
 
 每个条目都可以有很多属性（Attribute），比如常见的人都有姓名、地址、电话等属性。每个属性都有名称及对应的值，属性值可以有单个、多个。
 
-## 后端配置
-
-### 准备开发工具
-IDEA + mysql8 + jdk1.8 + redis（可选）
-
-### 数据库导入
-找到初始化文件ddl和dml
-目录
-
-LdapAuth\docs\mysql8\sql\1.0.1
-````
-#创建ldapauth库
-CREATE DATABASE ldapauth DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-#导入数据库
-soruece ddl.sql
-soruece dml.sql
-
-````
-
-### 系统配置文件-数据库
-````
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-#数据库账号
-spring.datasource.username=root
-#数据库密码
-spring.datasource.password=67B_EZ(WtxqCr9tT
-#链接配置
-spring.datasource.url=jdbc:mysql://192.168.31.222:3306/ldapauth?autoReconnect=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-````
 
 
-### 系统配置文件-redis
-
-````
-#是否开启redis，true=开启，false=不开启
-spring.redis.enabled=true
-spring.redis.database=0
-#RedisIP
-spring.redis.host=127.0.0.1
-#Redis端口
-spring.redis.port=6379
-#Redis密码
-spring.redis.password=123456
-spring.redis.jedis.pool.max-active=20
-spring.redis.jedis.pool.max-wait=-1
-spring.redis.jedis.pool.max-idle=10
-spring.redis.jedis.pool.min-idle=0
-spring.redis.timeout=1000
-````
-
-### 系统配置文件-其他配置
-
-````
-#程序端口
-server.port                                     =6501
-#访问上下文
-server.servlet.context-path                     =/ldap-api
-#后端是否使用ssl
-ldapauth.server.scheme                            =http
-#后端域名，生产环境需要修改为正式域名
-ldapauth.server.domain                            =localhost
-ldapauth.server.name                              =${ldapauth.server.scheme}://${ldapauth.server.domain}
-ldapauth.server.uri                               =${ldapauth.server.name}:${server.port}${server.servlet.context-path}
-#后端配置前端地址，生产环境需要修改为正式地址
-ldapauth.server.frontend.uri                      =http://localhost:6500
-ldapauth.server.default.uri                       =${ldapauth.server.frontend.uri}/index
-ldapauth.server.mgt.uri                           =${ldapauth.server.frontend.uri}/index
-#后端配置单点地址，生产环境需要修改为正式地址
-ldapauth.server.authz.uri                         =http://localhost:6501/ldap-api
-````
-
-### maven 编译指令
-
-maven clean package
-
-构建完成后，找到jar位置
-LdapAuth\ldapauth-webs\ldapauth-mgt\target\ldapauth-mgt-boot-1.0.1.jar
-
-## 前端编译
-进入ldapauth-ui
-
-### 构建依赖
-
-npm install --registry=https://registry.npm.taobao.org
-
-### 本地启动
-npm run dev
-
-### 打包
-npm run build
-
-得到静态dist目录文件放入nginx的html目录下即可，例如下入/root/ldapauth/nginx/html
-## nginx配置
-````
-server {
-listen       6500;
-listen       [::]:6500;
-server_name  _;
-
-
-	location / {
-		root   /root/ldapauth/nginx/html;
-		try_files $uri $uri/ /index.html;
-	}
-
-	#管理后端
-	location /ldap-api/ {
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header REMOTE-HOST $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass http://localhost:6501/ldap-api/;
-	}
-
-	error_page 404 /404.html;
-		location = /40x.html {
-	}
-
-	error_page 500 502 503 504 /50x.html;
-		location = /50x.html {
-	}
-}
-````
