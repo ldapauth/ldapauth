@@ -26,11 +26,38 @@
 + 支持 `SAML2`，`OAuth2`，`OIDC`，`CAS`，`JWT`等认证协议及机制，实现单点登录功能。
 + 完善的安全审计，详尽记录每一次用户行为，使每一步操作有据可循，实时记录企业信息安全状况，精准识别企业异常访问和潜在威胁的源头。
 
-## 技术架构
+## 技术选型
+#### 后端技术
 
-- **后端**：[Spring Boot](https://spring.io/projects/spring-boot/)
-- **前端**：[Vue.js](https://cn.vuejs.org/) 、[Element UI](https://element-plus.org/zh-CN/guide/design.html)
-- **中间件**：[MySQL](https://www.mysql.com/) 、[Redis](https://redis.io/)
+| 框架                     | 说明            | 版本     |
+|------------------------|---------------|--------|
+| Spring Boot            | 系统框架          | 2.7.18 |
+| Spring Cloud Alibaba   | 系统框架         | 2021.1 |
+| Freemarker             | 模板引擎         | 2.3.32| 
+| Knife4j                | API文档         | 4.0.0 | 
+| Mysql Connector        | 数据库驱动         | 8.0.31 |
+| Druid                  | JDBC 连接池、监控组件 | 1.2.16 |
+| Spring-Boot-Data-Redis | Redis         | 2.7.18 |
+| MyBatis Plus           | MyBatis 增强工具包 | 3.5.4 | 
+| Hutool                 | Java工具类库      | 5.8.15 | 
+| Lombok                 | 消除冗长的 Java 代码 | 1.18.26 | 
+| Ip2region              | IP解析工具        | 2.6.5 | 
+| Pinyin4j               | 文字转换工具        | 2.5.1 |
+| JavaxMail              | 邮件发送工具        | 1.6.2 |
+
+#### 前端技术
+
+| 框架           | 说明        | 版本     | 
+|--------------|-----------|--------|
+| vue          | 框架语言      | 3.4.31 |
+| vite         | 构建工具      | 5.3.2 | 
+| element-plus | 组件库       | 2.7.6 |
+| axios        | 网络库     | 0.28.1 | 
+| js-cookie    | Cookie库 | 3.0.5 |
+| jsencrypt    | 数据加解密库  | 3.3.2|
+| echarts      | 报表库       | 5.5.1 | 
+
+
 
 ## 单点登录
 单点登录(Single Sign On)简称为SSO
