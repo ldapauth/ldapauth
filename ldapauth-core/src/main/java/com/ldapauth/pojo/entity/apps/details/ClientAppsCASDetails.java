@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@TableName(value = "lda_apps_cas_details")
-@Schema(name = "AppsCasDetails", description = "CAS扩展表")
+@TableName(value = "lda_client_apps_cas_details")
+@Schema(name = "ClientAppsCASDetails", description = "CAS扩展表")
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class AppsCasDetails extends BaseEntity {
+public class ClientAppsCASDetails extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

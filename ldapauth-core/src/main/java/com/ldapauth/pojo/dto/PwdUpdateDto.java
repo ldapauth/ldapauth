@@ -15,6 +15,9 @@ import javax.validation.constraints.NotEmpty;
 @Schema(name = "PwdUpdateDto", description = "密码更新对象")
 public class PwdUpdateDto {
 
+    @Schema(name = "username",description = "登录账号")
+    String username;
+
     @NotEmpty(message = "原密码不能为空")
     @Schema(name = "oldPassword",description = "原密码")
     String oldPassword;

@@ -6,10 +6,10 @@ import com.ldapauth.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@TableName(value = "lda_apps")
-@Schema(name="Apps",description ="应用主表")
+@TableName(value = "lda_client_apps")
+@Schema(name="ClientApps",description ="客户端应用主表")
 @Data
-public class Apps extends BaseEntity {
+public class ClientApps extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 

@@ -3,10 +3,9 @@ package com.ldapauth.authn.web.interceptor;
 import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.persistence.service.AppLoginLogService;
-import com.ldapauth.persistence.service.AppsService;
-import com.ldapauth.pojo.entity.AppLoginLog;
+import com.ldapauth.pojo.entity.apps.ClientAppsLoginLog;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
 import org.slf4j.Logger;
@@ -31,13 +30,13 @@ public class HistorySignOnAppInterceptor  implements AsyncHandlerInterceptor  {
             Object handler,ModelAndView modelAndView)  {
         _logger.debug("postHandle");
 
-        final Apps app = (Apps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
+        final ClientApps app = (ClientApps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
         SignPrincipal principal = AuthorizationUtils.getPrincipal();
         if(principal != null && app !=null) {
         	 final UserInfo userInfo = principal.getUserInfo();
         	 String sessionId = principal.getSession().getId();
         	 _logger.trace("sessionId : " + sessionId + " ,appId : " + app.getId());
-             AppLoginLog historyLoginApps = new AppLoginLog();
+             ClientAppsLoginLog historyLoginApps = new ClientAppsLoginLog();
              historyLoginApps.setAppId(app.getId());
              historyLoginApps.setAppName(app.getAppName());
              historyLoginApps.setUserId(userInfo.getId());

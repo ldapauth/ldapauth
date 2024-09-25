@@ -6,8 +6,7 @@ import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.persistence.service.AppLoginLogService;
 import com.ldapauth.pojo.dto.AppLoginLogQueryDTO;
-import com.ldapauth.pojo.entity.AppLoginLog;
-import com.ldapauth.pojo.entity.LoginLog;
+import com.ldapauth.pojo.entity.apps.ClientAppsLoginLog;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.util.DateUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * @Author : 15829 //作者
@@ -46,21 +44,21 @@ public class AppLoginLogController {
     public Page list(AppLoginLogQueryDTO model) {
         SignPrincipal signPrincipal = AuthorizationUtils.getPrincipal();
         UserInfo currentUser = signPrincipal.getUserInfo();
-        LambdaQueryWrapper<AppLoginLog> queryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<ClientAppsLoginLog> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotEmpty(model.getDisplayName())) {
-            queryWrapper.like(AppLoginLog::getDisplayName,model.getDisplayName());
+            queryWrapper.like(ClientAppsLoginLog::getDisplayName,model.getDisplayName());
         }
         if (StringUtils.isNotEmpty(model.getAppName())) {
-            queryWrapper.like(AppLoginLog::getAppName,model.getAppName());
+            queryWrapper.like(ClientAppsLoginLog::getAppName,model.getAppName());
         }
         //如果是超级管理员，则设置全部查询，否则只能查询自己
         if (!signPrincipal.isRoleAdministrators()) {
-            queryWrapper.eq(AppLoginLog::getUserId,currentUser.getId());
+            queryWrapper.eq(ClientAppsLoginLog::getUserId,currentUser.getId());
         }
         if (model.getStartDate() != null && model.getEndDate() != null) {
-            queryWrapper.between(AppLoginLog::getCreateTime, model.getStartDate(), model.getEndDate());
+            queryWrapper.between(ClientAppsLoginLog::getCreateTime, model.getStartDate(), model.getEndDate());
         } else {
-            queryWrapper.between(AppLoginLog::getCreateTime,
+            queryWrapper.between(ClientAppsLoginLog::getCreateTime,
                     DateUtils.format(new Date(new Date().getTime() - 1000 * 60 * 60 * 24), DateUtils.FORMAT_DATE_YYYY_MM_DD_HH_MM_SS),
                     DateUtils.format(new Date(), DateUtils.FORMAT_DATE_YYYY_MM_DD_HH_MM_SS));
         }

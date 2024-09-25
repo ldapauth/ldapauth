@@ -1,6 +1,6 @@
 package com.ldapauth.pojo.dto;
 
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,7 +20,7 @@ public class AppsDetails<T> implements Serializable {
         super();
     }
 
-    private Apps app;
+    private ClientApps app;
 
     private T details;
 }

@@ -13,7 +13,7 @@
 			lgp.create_time
 		from lda_group_apps lgp
 			left join lda_group g on lgp.group_id = g.id
-			left join lda_apps lap on lgp.app_id = lap.id
+			left join lda_client_apps lap on lgp.app_id = lap.id
 			where 1 = 1
 		<if test="query.groupName != null and query.groupName != ''">
 			and g.name like concat('%',#{query.groupName},'%')

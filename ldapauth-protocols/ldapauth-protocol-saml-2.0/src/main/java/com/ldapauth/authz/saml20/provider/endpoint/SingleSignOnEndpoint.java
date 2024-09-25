@@ -10,10 +10,10 @@ import com.ldapauth.authz.saml20.binding.ExtractBindingAdapter;
 import com.ldapauth.authz.saml20.xml.SAML2ValidatorSuite;
 import com.ldapauth.crypto.keystore.KeyStoreUtil;
 import com.ldapauth.exception.BusinessException;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.AppsDetails;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
@@ -64,7 +64,7 @@ public class SingleSignOnEndpoint {
 	private SAML2ValidatorSuite validatorSuite;
 
 	@Autowired
-	private AppsService appsService;
+	private ClientAppsService appsService;
 
 	@Operation(summary = "SAML 2.0 SP Init接收接口", description = "传递参数应用ID",method="POST")
 	@RequestMapping(value = "/auth/saml20/{appid}", method=RequestMethod.POST)
@@ -100,11 +100,11 @@ public class SingleSignOnEndpoint {
 
 	public void extractSaml20Detail(ExtractBindingAdapter extractBindingAdapter,String samlId) throws Exception{
 		Result<AppsDetails> result = appsService.getDetails(Long.valueOf(samlId));
-		AppsSamlDetails saml20Details =null;
-		Apps apps =null;
+		ClientAppsSAMLDetails saml20Details =null;
+		ClientApps apps =null;
 		if (result.isSuccess()) {
 			AppsDetails d = result.getData();
-			saml20Details = (AppsSamlDetails) d.getDetails();
+			saml20Details = (ClientAppsSAMLDetails) d.getDetails();
 			apps = d.getApp();
 		}
 

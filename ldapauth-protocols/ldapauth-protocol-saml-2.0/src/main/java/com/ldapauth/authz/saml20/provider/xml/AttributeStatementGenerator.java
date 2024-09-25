@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.ldapauth.constants.ldap.ActiveDirectoryUser;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import org.opensaml.Configuration;
 import org.opensaml.saml2.core.Attribute;
 import org.opensaml.saml2.core.AttributeStatement;
@@ -31,7 +31,7 @@ public class AttributeStatementGenerator {
 	public static String COMMA_ISO8859_1 	= "#44;"; //#44; ->,
 
 	public AttributeStatement generateAttributeStatement(
-			AppsSamlDetails saml20Details,
+			ClientAppsSAMLDetails saml20Details,
 			ArrayList<GrantedAuthority> grantedAuthoritys,
 			UserInfo userInfo) {
 		return generateAttributeStatement(
@@ -40,7 +40,7 @@ public class AttributeStatementGenerator {
 	}
 
 	public AttributeStatement generateAttributeStatement(
-			AppsSamlDetails saml20Details,
+			ClientAppsSAMLDetails saml20Details,
 					ArrayList<GrantedAuthority> grantedAuthoritys,
 					HashMap<String,String>attributeMap,
 					UserInfo userInfo) {

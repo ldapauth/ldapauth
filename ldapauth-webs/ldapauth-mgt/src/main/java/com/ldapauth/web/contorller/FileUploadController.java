@@ -42,6 +42,13 @@ public class FileUploadController {
         return fileUploadService.upload(file, currentUser);
     }
 
+    @Operation(summary = "文件上传", description = "返回结果", security = {@SecurityRequirement(name = "Authorization")})
+    @ApiResponse(responseCode = "200", description = "成功")
+    @PostMapping("/uploadFile")
+    public Result<String> uploadFile(@RequestPart("uploadFile") MultipartFile file) {
+        UserInfo currentUser = AuthorizationUtils.getUserInfo();
+        return fileUploadService.uploadFile(file, currentUser);
+    }
     @GetMapping("/preview/{id}")
     public void previewImage(@PathVariable("id") Long id, HttpServletResponse response) throws IOException {
         fileUploadService.previewImage(id, response);

@@ -93,17 +93,35 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
         return super.getOne(lambdaQueryWrapper);
     }
 
+    @Override
+    public boolean updateLdapDnAndByLdapId(String ldapId, String ldapDn) {
+        LambdaUpdateWrapper<Group> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.set(Group::getLdapDn,ldapDn);
+        lambdaUpdateWrapper.set(Group::getUpdateTime,new Date());
+        lambdaUpdateWrapper.eq(Group::getLdapId,ldapId);
+        return super.update(lambdaUpdateWrapper);
+    }
 
 
     @Transactional
     @Override
     public boolean save(Group entity) {
         // 设置缺省值
-        if(StringUtils.isEmpty(entity.getObjectFrom())) {
-            if (synchronizersService.LdapConfig().getStatus() == ConstsStatus.DATA_ACTIVE) {
-                entity.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
-            } else {
+        // 设置缺省值
+        if (StringUtils.isEmpty(entity.getObjectFrom())) {
+            Synchronizers synchronizers = synchronizersService.LdapConfig();
+            if (Objects.isNull(synchronizers)) {
                 entity.setObjectFrom(ConstsSynchronizers.SYSTEM);
+            } else {
+                if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    entity.setObjectFrom(ConstsSynchronizers.ACTIVEDIRECTORY);
+                } else if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    entity.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
+                } else {
+                    entity.setObjectFrom(ConstsSynchronizers.SYSTEM);
+                }
             }
         }
         boolean flag =  super.save(entity);

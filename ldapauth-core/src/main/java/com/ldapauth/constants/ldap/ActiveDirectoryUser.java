@@ -154,6 +154,11 @@ public class ActiveDirectoryUser {
 	 */
 	public static final String USERPRINCIPALNAME 			= "userPrincipalName";
 	/**
+	 * objectGUID
+	 */
+	public static final String OBJECTGUID 			= "objectGUID";
+
+	/**
 	 * ldapauth\admin
 	 */
 	public static final String SAMACCOUNTNAME 				= "sAMAccountname";

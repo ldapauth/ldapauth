@@ -117,6 +117,12 @@
                            :show-overflow-tooltip="true" min-width="105"/>
           <el-table-column :label="t('user.belong')" align="center" prop="departmentNamePath"
                            :show-overflow-tooltip="true" min-width="110"/>
+          <el-table-column label="DN" prop="ldapDn" :show-overflow-tooltip="true" />
+          <el-table-column prop="object_from" :label="t('org.from')" align="center" min-width="60">
+            <template #default="scope">
+              <dict-tag :options="sys_data_object_from" :value="scope.row.objectFrom" />
+            </template>
+          </el-table-column>
           <el-table-column prop="status" :label="t('org.status')" align="center" width="70">
             <template #default="scope">
               <el-switch
@@ -129,11 +135,7 @@
               </el-switch>
             </template>
           </el-table-column>
-          <el-table-column prop="object_from" :label="t('org.from')" align="center" min-width="60">
-            <template #default="scope">
-              <dict-tag :options="sys_data_object_from" :value="scope.row.objectFrom" />
-            </template>
-          </el-table-column>
+
           <el-table-column :label="t('org.operate')" align="center" class-name="small-padding fixed-width" width="215">
             <template #default="scope">
               <el-button @click="handleUpdate(scope.row)" style ="margin-right: 10px" v-hasPermi="['user:edit']">{{t('org.edit')}}</el-button>

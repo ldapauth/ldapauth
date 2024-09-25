@@ -587,6 +587,7 @@ export default {
         "clientId": "管理凭证",
         "clientSecret": "管理秘钥",
         "baseDn": "基本DN",
+        "domain":"域名",
         "userDn": "用户所在DN",
         "groupDn": "组所在DN",
         "orgFilter": "组织过滤条件",
@@ -616,7 +617,9 @@ export default {
         }
       },
       "label": {
+        "classify": "数据源类型",
         "baseApi": "接口前缀",
+        "sslfile": "证书",
         "rootId": "组织根标识",
         "clientId": "应用凭证",
         "clientSecret": "应用秘钥",

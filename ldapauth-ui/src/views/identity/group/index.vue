@@ -68,19 +68,21 @@
          <el-table-column type="selection" width="55" align="center" :selectable="isAdministraror" />
          <el-table-column :label="t('group.name')" prop="name" :show-overflow-tooltip="true" width="400" />
          <el-table-column :label="t('text.description')" prop="description" :show-overflow-tooltip="true" />
+         <el-table-column label="DN" prop="ldapDn" :show-overflow-tooltip="true" />
+         <el-table-column prop="object_from" :label="t('org.from')" align="center" min-width="60">
+            <template #default="scope">
+              <dict-tag :options="sys_data_object_from" :value="scope.row.objectFrom" />
+            </template>
+          </el-table-column>
          <el-table-column :label="t('group.status')" align="center" width="100">
            <template #default="scope">
              <span v-if="scope.row.status === 0"><el-icon color="green"><SuccessFilled class="success" /></el-icon></span>
              <span v-if="scope.row.status === 1"><el-icon color="#808080"><CircleCloseFilled /></el-icon></span>
            </template>
          </el-table-column>
-        <el-table-column prop="object_from" label="来源" align="center" width="180">
-          <template #default="scope">
-            <dict-tag :options="sys_data_object_from" :value="scope.row.objectFrom" />
-          </template>
-        </el-table-column>
+
          <el-table-column :label="t('text.createdDate')" align="center" prop="createTime" width="200" />
-         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
+         <el-table-column :label="t('org.operate')" align="center" class-name="small-padding fixed-width" width="200">
             <template #default="scope">
               <el-button @click="handleUpdate(scope.row)" style ="margin-right: 10px" v-hasPermi="['group:edit']">{{ t('text.edit') }}</el-button>
               <el-dropdown v-hasPermi="['group:auth:user', 'group:auth:resource', 'group:delete']">
@@ -131,6 +133,9 @@
             <el-form-item :label="t('text.description')">
                <el-input v-model="form.description" type="textarea" :placeholder="t('group.descriptionPlaceholder')" maxlength="200"  show-word-limit></el-input>
             </el-form-item>
+           <el-form-item label="DN">
+             <el-input v-model="form.ldapDn" type="textarea" disabled="true" maxlength="200"  show-word-limit></el-input>
+           </el-form-item>
          </el-form>
          <template #footer>
             <div class="dialog-footer">

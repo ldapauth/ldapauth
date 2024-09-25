@@ -16,4 +16,7 @@ public interface FileUploadService extends IService<FileUpload> {
     void previewImage(Long id, HttpServletResponse response) throws IOException;
 
     String generateImageUrl(Long id);
+
+    Result<String> uploadFile(MultipartFile fileUpload, UserInfo currentUser);
+
 }

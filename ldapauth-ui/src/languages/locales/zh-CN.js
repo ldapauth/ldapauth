@@ -37,6 +37,7 @@ export default {
     "moreaction": "更多",
     "generate": "生成",
     "upload": "上传",
+    "agentupload": "重新上传",
     "save": "保存",
     "year": "年",
     "month": "月",
@@ -587,6 +588,7 @@ export default {
         "baseApi": "链接地址",
         "clientId": "管理凭证",
         "clientSecret": "管理秘钥",
+        "domain":"域名",
         "baseDn": "基本DN",
         "userDn": "用户所在DN",
         "groupDn": "组所在DN",
@@ -617,6 +619,8 @@ export default {
         }
       },
       "label": {
+        "classify": "数据源类型",
+        "sslfile": "证书",
         "baseApi": "接口前缀",
         "rootId": "组织根标识",
         "clientId": "应用凭证",

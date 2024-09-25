@@ -9,8 +9,8 @@ import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.pojo.entity.Organization;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.provision.abstracts.AbstractBaseHandle;
-import com.ldapauth.provision.interfaces.BaseHandle;
+import com.ldapauth.synchronizer.abstracts.AbstractPushSynchronizer;
+import com.ldapauth.synchronizer.ISynchronizerPushService;
 import com.ldapauth.util.LdapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +25,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class LdapPushUsersService extends AbstractBaseHandle implements BaseHandle {
+public class LdapPushUsersService extends AbstractPushSynchronizer implements ISynchronizerPushService {
 
 
     @Autowired
@@ -44,7 +44,7 @@ public class LdapPushUsersService extends AbstractBaseHandle implements BaseHand
                 UserInfo userInfo = (UserInfo) data;
                 String peopleDn = synchronizer.getUserDn();
                 // 创建组条目的DN
-                String userDn = getLdapUserDN(userInfo.getObjectFrom(),userInfo.getUsername(),synchronizer);
+                String userDn = getLdapUserDN(userInfo.getObjectFrom(),"UID",userInfo.getUsername(),synchronizer);
                 String userPassword = decoderPassword(userInfo.getDecipherable());
                 // 创建用户的Attributes
                 Attributes attributes = new BasicAttributes();
@@ -142,7 +142,7 @@ public class LdapPushUsersService extends AbstractBaseHandle implements BaseHand
                 UserInfo userInfo = (UserInfo) data;
                 String peopleDn = "ou=people,"+synchronizer.getBaseDn();
                 // 创建组条目的DN
-                String userDn = getLdapUserDN(userInfo.getObjectFrom(),userInfo.getUsername(),synchronizer);
+                String userDn = getLdapUserDN(userInfo.getObjectFrom(),"UID",userInfo.getUsername(),synchronizer);
                 //如果两个一致，则不需要更新
                 if (!userDn.equalsIgnoreCase(userInfo.getLdapDn())) {
                     dirContext.rename(userInfo.getLdapDn(),userDn);
@@ -261,8 +261,31 @@ public class LdapPushUsersService extends AbstractBaseHandle implements BaseHand
 
 
     public static void main(String[] args) {
-        clean();
-        cleanUser();
+        String ldapUserDN = "ldapauth\\administrator";
+        String ldapPassword = "Shibl@123456";
+        String baseDn = "ldaps://192.168.0.104";
+        // 初始化上下文环境
+        String trustStore= "/app/ldapauth/trustStoreFile.jks";
+        String trustStorePassword = "ldapauth";
+        DirContext ctx = null;
+        try {
+            LdapUtils utils = new LdapUtils(
+                    baseDn,
+                    ldapUserDN,
+                    ldapPassword,
+                    "OU=软件安全科技有限公司,DC=ldapauth,DC=com");
+            utils.setSsl(true);
+            utils.setTrustStore(trustStore);
+            utils.setTrustStorePassword(trustStorePassword);
+            ctx = utils.openConnection();
+            if(null != ctx) {
+                System.out.println("链接成功");
+            } else {
+                System.err.println("链接失败");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public static void initData() {

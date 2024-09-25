@@ -1,16 +1,13 @@
 package com.ldapauth.authz.oauth2.provider.client;
 
-import java.util.Map;
 import com.ldapauth.authz.oauth2.domain.ClientDetails;
 import com.ldapauth.authz.oauth2.domain.client.BaseClientDetails;
 import com.ldapauth.authz.oauth2.provider.ClientDetailsService;
 import com.ldapauth.authz.oauth2.provider.ClientRegistrationService;
-import com.ldapauth.authz.oauth2.provider.NoSuchClientException;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.AppsDetails;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsOidcDetails;
-import org.springframework.dao.EmptyResultDataAccessException;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsOIDCDetails;
 import org.springframework.util.StringUtils;
 
 /**
@@ -18,17 +15,17 @@ import org.springframework.util.StringUtils;
  */
 public class JdbcClientDetailsService implements ClientDetailsService, ClientRegistrationService{
 
-    AppsService appsService;
+    ClientAppsService appsService;
 
-    public JdbcClientDetailsService(AppsService appsService) {
+    public JdbcClientDetailsService(ClientAppsService appsService) {
         this.appsService = appsService;
     }
 
     public ClientDetails loadClientByClientId(String clientId, boolean cached) {
         // cache in memory
-        AppsDetails<AppsOidcDetails> detailsAppsDetails = appsService.getDetailsClientId(clientId);
-        Apps apps = detailsAppsDetails.getApp();
-        AppsOidcDetails appsOidcDetails = detailsAppsDetails.getDetails();
+        AppsDetails<ClientAppsOIDCDetails> detailsAppsDetails = appsService.getDetailsClientId(clientId);
+        ClientApps apps = detailsAppsDetails.getApp();
+        ClientAppsOIDCDetails appsOidcDetails = detailsAppsDetails.getDetails();
         BaseClientDetails detailss = new BaseClientDetails(
                 apps.getClientId(),
                 null,

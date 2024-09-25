@@ -9,7 +9,6 @@ import com.ldapauth.persistence.service.GroupService;
 import com.ldapauth.pojo.dto.*;
 import com.ldapauth.pojo.entity.Group;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.Apps;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.validate.AddGroup;
 import com.ldapauth.validate.EditGroup;

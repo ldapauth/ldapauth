@@ -15,3 +15,5 @@ com.ldapauth.autoconfigure.LdapAuthMgtMvcConfig
 com.ldapauth.autoconfigure.CasAutoConfiguration
 com.ldapauth.autoconfigure.Saml20AutoConfiguration
 com.ldapauth.autoconfigure.Oauth20AutoConfiguration
+com.ldapauth.synchronizer.autoconfigure.SynchronizerAutoConfiguration
+com.ldapauth.autoconfigure.RestClientAutoConfiguration

@@ -5,7 +5,7 @@ import java.security.KeyStore;
 import javax.servlet.http.HttpServletRequest;
 
 import com.ldapauth.crypto.keystore.KeyStoreLoader;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import org.opensaml.common.binding.SAMLMessageContext;
 import org.opensaml.ws.message.decoder.MessageDecodingException;
 import org.opensaml.ws.security.SecurityPolicyResolver;
@@ -29,9 +29,9 @@ public interface ExtractBindingAdapter {
 
 	public void buildSecurityPolicyResolver(KeyStore trustKeyStore);
 
-	public void setSaml20Detail(AppsSamlDetails saml20Detail);
+	public void setSaml20Detail(ClientAppsSAMLDetails saml20Detail);
 
-	public AppsSamlDetails getSaml20Detail();
+	public ClientAppsSAMLDetails getSaml20Detail();
 
 	public KeyStoreLoader getKeyStoreLoader();
 

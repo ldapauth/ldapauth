@@ -17,8 +17,8 @@ import com.ldapauth.pojo.entity.Organization;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.pojo.vo.Result;
-import com.ldapauth.synchronizer.AbstractSynchronizerService;
-import com.ldapauth.synchronizer.ISynchronizerService;
+import com.ldapauth.synchronizer.abstracts.AbstractSynchronizerService;
+import com.ldapauth.synchronizer.ISynchronizerPullService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class FeishuPullService extends AbstractSynchronizerService implements ISynchronizerService {
+public class FeishuPullService extends AbstractSynchronizerService implements ISynchronizerPullService {
 
 	@Autowired
 	OrganizationService organizationService;

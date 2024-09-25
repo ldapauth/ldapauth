@@ -65,7 +65,7 @@
           <el-form-item :label="t('user.email')" prop="email">
             <el-input v-model="form.email"></el-input>
           </el-form-item>
-          <el-form-item :label="t('user.email')">
+          <el-form-item :label="t('user.birthDate')">
             <el-date-picker
                 style="width: 100%"
                 v-model="form.birthDate"
@@ -74,6 +74,9 @@
                 value-format="YYYY-MM-DD"
                 :placeholder="t('user.birthDate')">
             </el-date-picker>
+          </el-form-item>
+          <el-form-item label="DN">
+            <el-input v-model="form.ldapDn" type="textarea" disabled="true" maxlength="200"  show-word-limit></el-input>
           </el-form-item>
         </el-col>
       </el-row>

@@ -11,3 +11,15 @@ export function upload(data) {
     }
   })
 }
+
+//上传文件
+export function uploadFile(data) {
+  return request({
+    url: '/file/uploadFile',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    }
+  })
+}

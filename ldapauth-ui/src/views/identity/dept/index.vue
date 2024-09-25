@@ -89,13 +89,12 @@
         >
           <el-table-column type="selection" width="55" align="center"/>
           <el-table-column prop="orgName" :label="t('org.name')" align="center" min-width="100" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column prop="openDepartmentId" :label="t('org.openId')" align="center" min-width="100" :show-overflow-tooltip="true"></el-table-column>
+          <el-table-column prop="namePath" :label="t('org.path')" align="left" :show-overflow-tooltip="true" min-width="100" />
+          <el-table-column label="DN" prop="ldapDn" :show-overflow-tooltip="true" />
           <el-table-column prop="object_from" :label="t('org.from')" align="center" min-width="60">
             <template #default="scope">
               <dict-tag :options="sys_data_object_from" :value="scope.row.objectFrom" />
             </template>
-          </el-table-column>
-          <el-table-column prop="namePath" :label="t('org.path')" align="left" :show-overflow-tooltip="true" min-width="100">
           </el-table-column>
           <el-table-column prop="status" :label="t('org.status')" align="center" width="100">
             <template #default="scope">

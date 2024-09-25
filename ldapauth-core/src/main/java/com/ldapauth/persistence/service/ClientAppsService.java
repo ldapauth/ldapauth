@@ -2,23 +2,23 @@ package com.ldapauth.persistence.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ldapauth.pojo.dto.*;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsJwtDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsOidcDetails;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsOIDCDetails;
 import com.ldapauth.pojo.vo.Result;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public interface AppsService extends IService<Apps> {
+public interface ClientAppsService extends IService<ClientApps> {
 
 
     /**
      * 获取用户授权的应用列表
      * @param userId
      */
-    List<Apps> myApps(Long userId);
+    List<ClientApps> myApps(Long userId);
 
     Result<String> oidcCreate(AppsOidcDTO dto);
     Result<String> oidcUpdate(AppsOidcDTO dto);
@@ -39,7 +39,7 @@ public interface AppsService extends IService<Apps> {
      * @param clientId
      * @return
      */
-    AppsDetails<AppsOidcDetails> getDetailsClientId(String clientId);
+    AppsDetails<ClientAppsOIDCDetails> getDetailsClientId(String clientId);
 
     int updateStatus(ArrayList<Long> ids, int i);
 
@@ -51,13 +51,13 @@ public interface AppsService extends IService<Apps> {
      * @param isMach
      * @return
      */
-    AppsCasDetails getAppDetails(String service, boolean isMach);
+    ClientAppsCASDetails getAppDetails(String service, boolean isMach);
 
     /**
      * 根据appId获取jwt对象
      * @return
      */
-    AppsJwtDetails getAppsJwtDetails(Long appId);
+    ClientAppsJWTDetails getAppsJwtDetails(Long appId);
 
     /**
      * 基于client查询应用
@@ -65,6 +65,6 @@ public interface AppsService extends IService<Apps> {
      * @param isMach
      * @return
      */
-    Apps getByClientId(String clientId, boolean isMach);
+    ClientApps getByClientId(String clientId, boolean isMach);
 
 }

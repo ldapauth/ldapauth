@@ -11,6 +11,8 @@ public final class ConstsSynchronizers {
     public static final String FEISHU = "feishu";
     public static final String WORKWEIXIN = "workweixin";
 
+    public static final String ACTIVEDIRECTORY = "activedirectory";
+
     /**
      * 定义API接口前缀
      */

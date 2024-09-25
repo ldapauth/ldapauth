@@ -10,7 +10,7 @@ import com.ldapauth.authz.endpoint.adapter.AbstractAuthorizeAdapter;
 import com.ldapauth.constants.IDPCacheConstants;
 import com.ldapauth.crypto.jwt.encryption.service.impl.DefaultJwtEncryptionAndDecryptionService;
 import com.ldapauth.crypto.jwt.signer.service.impl.DefaultJwtSigningAndValidationService;
-import com.ldapauth.pojo.entity.apps.details.AppsJwtDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
 import com.ldapauth.web.WebConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -32,7 +32,7 @@ import com.nimbusds.jwt.SignedJWT;
 public class JwtAdapter extends AbstractAuthorizeAdapter {
 	final static Logger _logger = LoggerFactory.getLogger(JwtAdapter.class);
 
-	AppsJwtDetails jwtDetails;
+	ClientAppsJWTDetails jwtDetails;
 
 	JWT jwtToken;
 
@@ -45,7 +45,7 @@ public class JwtAdapter extends AbstractAuthorizeAdapter {
 
 	}
 
-	public JwtAdapter(AppsJwtDetails jwtDetails) {
+	public JwtAdapter(ClientAppsJWTDetails jwtDetails) {
 		this.jwtDetails = jwtDetails;
 	}
 
@@ -164,7 +164,7 @@ public class JwtAdapter extends AbstractAuthorizeAdapter {
 		return modelAndView;
 	}
 
-	public void setJwtDetails(AppsJwtDetails jwtDetails) {
+	public void setJwtDetails(ClientAppsJWTDetails jwtDetails) {
 		this.jwtDetails = jwtDetails;
 	}
 

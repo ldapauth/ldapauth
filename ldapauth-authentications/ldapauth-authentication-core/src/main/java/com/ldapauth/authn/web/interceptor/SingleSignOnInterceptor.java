@@ -1,32 +1,27 @@
 package com.ldapauth.authn.web.interceptor;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.URLUtil;
 import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.authn.jwt.AuthTokenService;
 import com.ldapauth.authn.session.SessionManager;
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.configuration.ApplicationConfig;
-import com.ldapauth.crypto.Base64Utils;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.persistence.service.PermissionAuthenticationService;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 单点登录拦截器
@@ -48,7 +43,7 @@ public class SingleSignOnInterceptor  implements AsyncHandlerInterceptor {
 	AuthTokenService authTokenService ;
 
     @Autowired
-	AppsService appsService;
+	ClientAppsService appsService;
 
 	/**
 	 * 鉴权
@@ -77,11 +72,11 @@ public class SingleSignOnInterceptor  implements AsyncHandlerInterceptor {
         //判断应用访问权限
         if(AuthorizationUtils.isAuthenticated()){
 	        _logger.debug("preHandle {}",request.getRequestURI());
-	        Apps app = (Apps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
+	        ClientApps app = (ClientApps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
 	        if(app == null) {
 	        	String requestURI = request.getRequestURI();
 	        	if(requestURI.contains("/authz/cas/login")) {//for CAS service
-					AppsCasDetails casDetails = appsService.getAppDetails(request.getParameter("serivce"), true);
+					ClientAppsCASDetails casDetails = appsService.getAppDetails(request.getParameter("serivce"), true);
 					if (Objects.nonNull(casDetails)) {
 						app = appsService.getById(casDetails.getAppId());
 					}

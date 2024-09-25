@@ -1,6 +1,14 @@
 <template>
   <div class="app-container">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="150px">
+
+<!--      <el-form-item :label="t('sync.common.label.classify')" prop="classify">
+        <el-select v-model="form.classify">
+             <el-option label="OpenLdap" value="openldap"></el-option>
+            <el-option label="Activedirectory" value="activedirectory"></el-option>
+        </el-select>
+      </el-form-item>-->
+
       <el-form-item :label="t('sync.common.ldap.baseApi')" prop="baseApi">
         <el-input v-model="form.baseApi" :placeholder="t('sync.common.ldap.placeholder.baseApi')" maxlength="255"  show-word-limit/>
       </el-form-item>
@@ -9,6 +17,9 @@
       </el-form-item>
       <el-form-item :label="t('sync.common.ldap.clientSecret')" prop="clientSecret">
         <el-input  v-model="form.clientSecret" :placeholder="t('sync.common.ldap.placeholder.clientSecret')"type="password" show-password />
+      </el-form-item>
+      <el-form-item :label="t('sync.common.ldap.domain')" prop="domain">
+        <el-input v-model="form.baseDomain"  maxlength="128"  show-word-limit />
       </el-form-item>
       <el-form-item :label="t('sync.common.ldap.baseDn')" prop="baseDn">
         <el-input v-model="form.baseDn" :placeholder="t('sync.common.ldap.placeholder.baseDn')" maxlength="64"  show-word-limit />
@@ -27,6 +38,9 @@
       </el-form-item>
       <el-form-item :label="t('sync.common.ldap.groupFilter')" prop="groupFilter">
         <el-input v-model="form.groupFilter" :placeholder="t('sync.common.ldap.placeholder.groupFilter')" maxlength="255"  show-word-limit />
+      </el-form-item>
+      <el-form-item label="SSL">
+        <el-switch v-model="form.openssl" />
       </el-form-item>
       <el-form-item :label="t('sync.common.label.status')">
         <el-radio-group v-model.number="form.status">
@@ -77,6 +91,7 @@ import {
   testSynchronizers,
   updateSynchronizers
 } from "@/api/system/synchronizers.js";
+import {uploadFile} from "@/api/system/upload.js";
 const { proxy } = getCurrentInstance();
 
 const { sys_normal_disable ,sys_cron_list } = proxy.useDict("sys_normal_disable","sys_cron_list");
@@ -95,6 +110,7 @@ const data = reactive({
     groupFilter: undefined,
     status: 0,
     cron: "0 0 0/6 * * ?",
+    openssl: false,
     description: undefined
   },
   queryParams: {
@@ -131,6 +147,7 @@ function reset() {
     groupFilter: undefined,
     status: 0,
     cron: "0 0 0/6 * * ?",
+    openssl: false,
     description: undefined
   };
 }
@@ -139,6 +156,24 @@ function get(){
   getSynchronizers(form.value.id).then(res => {
     if (res.success) {
       form.value = res.data
+    }
+  });
+}
+
+function handleUploadFile(file){
+  let miniFile = file.raw;
+  const isLt2M = miniFile.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    proxy.$modal.msgError(t('common.rules.size'))
+    return;
+  }
+  const formData = new FormData();
+  formData.append("uploadFile",file.raw);
+  uploadFile(formData).then((res) => {
+    if(res.code == 200) {
+      form.value.sslFileId = res.data;
+    } else {
+      proxy.$modal.msgError(res.message)
     }
   });
 }

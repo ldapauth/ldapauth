@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -180,10 +179,19 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         // 设置缺省值
         if (StringUtils.isEmpty(entity.getObjectFrom())) {
-            if (synchronizersService.LdapConfig().getStatus() == ConstsStatus.DATA_ACTIVE) {
-                entity.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
-            } else {
+            Synchronizers synchronizers = synchronizersService.LdapConfig();
+            if (Objects.isNull(synchronizers)) {
                 entity.setObjectFrom(ConstsSynchronizers.SYSTEM);
+            } else {
+                if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    entity.setObjectFrom(ConstsSynchronizers.ACTIVEDIRECTORY);
+                } else if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    entity.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
+                } else {
+                    entity.setObjectFrom(ConstsSynchronizers.SYSTEM);
+                }
             }
         }
         if (StringUtils.isNotBlank(entity.getPassword())) {
@@ -626,6 +634,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             return Result.success(randomPassword);
         }
         return Result.failed("重置密码失败");
+    }
+
+    @Override
+    public boolean updateLdapDnAndByLdapId(String ldapId, String ldapDn) {
+        LambdaUpdateWrapper<UserInfo> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.set(UserInfo::getLdapDn,ldapDn);
+        lambdaUpdateWrapper.set(UserInfo::getUpdateTime,new Date());
+        lambdaUpdateWrapper.eq(UserInfo::getLdapId,ldapId);
+        return super.update(lambdaUpdateWrapper);
     }
 }
 

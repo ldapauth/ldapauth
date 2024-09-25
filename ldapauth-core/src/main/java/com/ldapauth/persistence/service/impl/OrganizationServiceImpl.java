@@ -21,6 +21,7 @@ import com.ldapauth.persistence.service.SynchronizersService;
 import com.ldapauth.pojo.dto.IdsListDto;
 import com.ldapauth.pojo.dto.OrganizationQueryDTO;
 import com.ldapauth.pojo.entity.Organization;
+import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.provision.ProvisionAction;
@@ -115,11 +116,20 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
         organization.setIdPath(idPath);
         organization.setNamePath(namePath);
         // 设置缺省值
-        if(StringUtils.isEmpty(organization.getObjectFrom())) {
-            if (synchronizersService.LdapConfig().getStatus() == ConstsStatus.DATA_ACTIVE) {
-                organization.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
-            } else {
+        if (StringUtils.isEmpty(organization.getObjectFrom())) {
+            Synchronizers synchronizers = synchronizersService.LdapConfig();
+            if (Objects.isNull(synchronizers)) {
                 organization.setObjectFrom(ConstsSynchronizers.SYSTEM);
+            } else {
+                if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    organization.setObjectFrom(ConstsSynchronizers.ACTIVEDIRECTORY);
+                } else if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP) &&
+                        synchronizers.getStatus() == ConstsStatus.DATA_ACTIVE) {
+                    organization.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
+                } else {
+                    organization.setObjectFrom(ConstsSynchronizers.SYSTEM);
+                }
             }
         }
         boolean save = super.save(organization);
@@ -179,6 +189,18 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
                 }).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(updatedOrgInfos)) {
             result = super.updateBatchById(updatedOrgInfos);
+            if(result &&
+                    (organization.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY) ||
+                    organization.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP))
+            ){
+                Synchronizers synchronizers = synchronizersService.LdapConfig();
+                for (Organization chin : updatedOrgInfos){
+                    //重新计算ldapDn
+
+                    //重新计算部门用户的ldapDn
+
+                }
+            }
         }
 
         if (result) {
@@ -534,6 +556,17 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
         lambdaUpdateWrapper.eq(Organization::getId,id);
         return super.update(lambdaUpdateWrapper);
     }
+
+    @Override
+    public boolean updateLdapDnAndByLdapId(String ldapId, String ldapDn) {
+        LambdaUpdateWrapper<Organization> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.set(Organization::getLdapDn,ldapDn);
+        lambdaUpdateWrapper.set(Organization::getUpdateTime,new Date());
+        lambdaUpdateWrapper.eq(Organization::getLdapId,ldapId);
+        return super.update(lambdaUpdateWrapper);
+    }
+
+
 
     /**
      * @Description: 检查是否有存在的子组织机构

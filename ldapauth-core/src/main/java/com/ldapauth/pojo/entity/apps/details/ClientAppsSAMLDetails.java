@@ -9,11 +9,11 @@ import lombok.EqualsAndHashCode;
 
 import java.security.cert.X509Certificate;
 
-@TableName(value = "lda_apps_saml_v20_details")
-@Schema(name = "AppsSamlDetails", description = "SAML扩展表")
+@TableName(value = "lda_client_apps_saml_details")
+@Schema(name = "ClientAppsSAMLDetails", description = "SAML扩展表")
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class AppsSamlDetails extends BaseEntity {
+public class ClientAppsSAMLDetails extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

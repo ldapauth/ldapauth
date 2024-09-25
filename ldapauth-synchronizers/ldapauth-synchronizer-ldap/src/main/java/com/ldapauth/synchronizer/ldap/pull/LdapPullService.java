@@ -13,8 +13,8 @@ import com.ldapauth.pojo.entity.Organization;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.pojo.vo.Result;
-import com.ldapauth.synchronizer.AbstractSynchronizerService;
-import com.ldapauth.synchronizer.ISynchronizerService;
+import com.ldapauth.synchronizer.abstracts.AbstractSynchronizerService;
+import com.ldapauth.synchronizer.ISynchronizerPullService;
 import com.ldapauth.synchronizer.ldap.domain.LdapGroup;
 import com.ldapauth.synchronizer.ldap.domain.LdapOrg;
 import com.ldapauth.synchronizer.ldap.domain.LdapUser;
@@ -33,7 +33,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class LdapPullService extends AbstractSynchronizerService implements ISynchronizerService {
+public class LdapPullService extends AbstractSynchronizerService implements ISynchronizerPullService {
 
 	@Autowired
 	OrganizationService organizationService;

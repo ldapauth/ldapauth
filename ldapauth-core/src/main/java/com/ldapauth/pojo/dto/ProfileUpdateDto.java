@@ -17,6 +17,9 @@ import java.util.Date;
 @Data
 public class ProfileUpdateDto {
 
+    @Schema(name = "username",description = "登录账号")
+    String username;
+
     @NotEmpty(message = "姓名不能为空")
     @Schema(name = "displayName", description = "姓名")
     String displayName;

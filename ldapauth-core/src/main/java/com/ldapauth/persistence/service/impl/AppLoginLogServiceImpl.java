@@ -3,7 +3,7 @@ package com.ldapauth.persistence.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ldapauth.persistence.mapper.AppLoginLogMapper;
 import com.ldapauth.persistence.service.AppLoginLogService;
-import com.ldapauth.pojo.entity.AppLoginLog;
+import com.ldapauth.pojo.entity.apps.ClientAppsLoginLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class AppLoginLogServiceImpl extends ServiceImpl<AppLoginLogMapper, AppLoginLog> implements AppLoginLogService {
+public class AppLoginLogServiceImpl extends ServiceImpl<AppLoginLogMapper, ClientAppsLoginLog> implements AppLoginLogService {
 }

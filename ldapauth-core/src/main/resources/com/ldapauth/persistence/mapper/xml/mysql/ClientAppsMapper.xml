@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ldapauth.persistence.mapper.AppsMapper">
+<mapper namespace="com.ldapauth.persistence.mapper.ClientAppsMapper">
 
-	<select id="myApps" parameterType="Long" resultType="com.ldapauth.pojo.entity.apps.Apps">
+	<select id="myApps" parameterType="Long" resultType="com.ldapauth.pojo.entity.apps.ClientApps">
 		select
 			app.*
-		from lda_apps app
+		from lda_client_apps app
 			where id in (
 				select app_id from lda_group_apps where group_id in (
 					select id from lda_group where ( id in (

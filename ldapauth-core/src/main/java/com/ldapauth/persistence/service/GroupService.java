@@ -53,4 +53,13 @@ public interface GroupService extends IService<Group> {
     Group getGroupIdByLdapId(String ldapId);
 
 
+
+    /**
+     * 修改ldapdn
+     * @param ldapId
+     * @param ldapDn
+     * @return
+     */
+    boolean updateLdapDnAndByLdapId(String ldapId,String ldapDn);
+
 }

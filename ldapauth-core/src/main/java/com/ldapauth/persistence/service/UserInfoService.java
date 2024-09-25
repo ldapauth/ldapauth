@@ -153,4 +153,12 @@ public interface UserInfoService extends IService<UserInfo> {
      * @Param: [id]
      */
     Result<String> resetPassword(Long id);
+
+    /**
+     * 修改ldapdn
+     * @param ldapId
+     * @param ldapDn
+     * @return
+     */
+    boolean updateLdapDnAndByLdapId(String ldapId,String ldapDn);
 }

@@ -198,6 +198,10 @@ export default {
   ],
   "sys_data_object_from": [
     {
+      "label":'Activedirectory',
+      "value": "activedirectory"
+    },
+    {
       "label":t('distdata.sys_data_object_from.openLdap'),
       "value": "openldap"
     },

@@ -587,6 +587,7 @@ export default {
         "clientId": "Administrator",
         "clientSecret": "Password",
         "baseDn": "BaseDn",
+        "domain":"Domain",
         "userDn": "UserDn",
         "groupDn": "GroupDn",
         "orgFilter": "OrgFilter",
@@ -616,7 +617,9 @@ export default {
         }
       },
       "label": {
+        "classify": "Data Classify",
         "baseApi": "Address",
+        "sslfile": "File",
         "rootId": "RootId",
         "clientId": "ClientId",
         "clientSecret": "ClientSecret",

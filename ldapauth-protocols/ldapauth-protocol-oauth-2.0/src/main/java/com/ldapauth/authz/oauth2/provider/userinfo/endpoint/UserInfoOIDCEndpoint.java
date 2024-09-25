@@ -16,7 +16,7 @@ import com.ldapauth.authz.oauth2.domain.ClientDetails;
 import com.ldapauth.constants.ContentType;
 import com.ldapauth.crypto.jwt.encryption.service.impl.DefaultJwtEncryptionAndDecryptionService;
 import com.ldapauth.crypto.jwt.signer.service.impl.DefaultJwtSigningAndValidationService;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.util.JsonUtils;
@@ -71,7 +71,7 @@ public class UserInfoOIDCEndpoint {
 	private UserInfoService userInfoService;
 
 	@Autowired
-	protected AppsService appsService;
+	protected ClientAppsService appsService;
 
 	OAuthDefaultUserInfoAdapter defaultOAuthUserInfoAdapter=new OAuthDefaultUserInfoAdapter();
 

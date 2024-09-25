@@ -2,7 +2,6 @@ package com.ldapauth.web.contorller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.tree.Tree;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.persistence.service.ResourceService;
 import com.ldapauth.pojo.dto.*;
@@ -11,7 +10,6 @@ import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.validate.AddGroup;
 import com.ldapauth.validate.EditGroup;
-import com.sun.tools.javac.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

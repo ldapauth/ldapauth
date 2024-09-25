@@ -80,6 +80,31 @@ public class FileUploadServiceImpl extends ServiceImpl<FileUploadMapper, FileUpl
     }
 
     @Override
+    public Result<String> uploadFile(MultipartFile file, UserInfo currentUser) {
+        if (Objects.nonNull(file)) {
+            try {
+                FileUpload fileUpload = new FileUpload();
+                fileUpload.setContentType(file.getContentType());
+                fileUpload.setFileName(file.getOriginalFilename());
+                fileUpload.setContentSize(file.getSize());
+                fileUpload.setUploaded(file.getBytes());
+                fileUpload.setCreateTime(new Date());
+                if (Objects.nonNull(currentUser)) {
+                    fileUpload.setCreateBy(currentUser.getId());
+                }
+                boolean save = super.save(fileUpload);
+                if (save) {
+                    return Result.success(String.valueOf(fileUpload.getId()));
+                }
+                return Result.failed("上传失败");
+            } catch (IOException e) {
+                log.error("FileUpload IOException",e);
+            }
+        }
+        return Result.failed("缺少上传对象");
+    }
+
+    @Override
     public void previewImage(Long id, HttpServletResponse response) throws IOException{
         FileUpload fileUpload = super.getById(id);
         if (Objects.nonNull(fileUpload)) {

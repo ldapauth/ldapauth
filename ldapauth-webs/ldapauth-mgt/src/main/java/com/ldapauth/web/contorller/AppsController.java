@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import com.ldapauth.authn.web.AuthorizationUtils;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.*;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.validate.AddGroup;
 import com.ldapauth.validate.EditGroup;
@@ -42,7 +42,7 @@ import java.util.Objects;
 public class AppsController {
 
     @Autowired
-    private AppsService service;
+    private ClientAppsService service;
 
     /**
      * 分页+
@@ -52,7 +52,7 @@ public class AppsController {
             security = {@SecurityRequirement(name = "Authorization")})
     @ApiResponse(responseCode = "200", description = "成功")
     @GetMapping(value = "/myApps")
-    public Result<List<Apps>> myApps() {
+    public Result<List<ClientApps>> myApps() {
         UserInfo currentUser = AuthorizationUtils.getUserInfo();
         return Result.success(service.myApps(currentUser.getId()));
     }
@@ -71,7 +71,7 @@ public class AppsController {
     )
     @GetMapping(value = "/list")
     public Page list(@ParameterObject AppsQueryDTO model) {
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
 
       /*  if (ObjectUtils.isNotEmpty(model.getInstId())){
             queryWrapper.eq(Apps::getInstId,model.getInstId());
@@ -80,16 +80,16 @@ public class AppsController {
         }
 */
         if (StringUtils.isNotEmpty(model.getAppCode())) {
-            queryWrapper.like(Apps::getAppCode,model.getAppCode());
+            queryWrapper.like(ClientApps::getAppCode,model.getAppCode());
         }
         if (StringUtils.isNotEmpty(model.getAppName())) {
-            queryWrapper.like(Apps::getAppName,model.getAppName());
+            queryWrapper.like(ClientApps::getAppName,model.getAppName());
         }
         if (Objects.nonNull(model.getProtocol())) {
-            queryWrapper.eq(Apps::getProtocol,model.getProtocol());
+            queryWrapper.eq(ClientApps::getProtocol,model.getProtocol());
         }
         if (Objects.nonNull(model.getStatus())) {
-            queryWrapper.eq(Apps::getStatus,model.getStatus());
+            queryWrapper.eq(ClientApps::getStatus,model.getStatus());
         }
         return service.page(model.build(),queryWrapper);
     }
@@ -97,7 +97,7 @@ public class AppsController {
     @Operation(summary = "查询全部应用", description = "返回查询对象", security = {@SecurityRequirement(name = "Authorization")})
     @ApiResponse(responseCode = "200", description = "成功")
     @GetMapping(value = "/all")
-    public Result<List<Apps>> all() {
+    public Result<List<ClientApps>> all() {
         return Result.success(service.list());
     }
 

@@ -2,8 +2,7 @@ package com.ldapauth.authz.cas.endpoint.adapter;
 
 import com.ldapauth.authz.cas.endpoint.response.ServiceResponseBuilder;
 import com.ldapauth.authz.endpoint.adapter.AbstractAuthorizeAdapter;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsJwtDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
 import com.ldapauth.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,7 @@ public class CasPlainAdapter extends AbstractAuthorizeAdapter {
 
 	ServiceResponseBuilder serviceResponseBuilder;
 
-	AppsCasDetails appsCasDetails;
+	ClientAppsCASDetails appsCasDetails;
 
 	@Override
 	public ModelAndView authorize(ModelAndView modelAndView) {
@@ -25,7 +24,7 @@ public class CasPlainAdapter extends AbstractAuthorizeAdapter {
 
 	}
 
-	public CasPlainAdapter(AppsCasDetails appsCasDetails) {
+	public CasPlainAdapter(ClientAppsCASDetails appsCasDetails) {
 		this.appsCasDetails = appsCasDetails;
 	}
 	@Override

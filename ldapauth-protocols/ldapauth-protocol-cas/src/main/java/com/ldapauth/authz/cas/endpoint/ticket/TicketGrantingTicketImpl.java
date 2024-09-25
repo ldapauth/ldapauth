@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import javax.persistence.Column;
@@ -112,7 +112,7 @@ public class TicketGrantingTicketImpl extends AbstractTicket implements TicketGr
     }
 
     @Override
-    public synchronized ServiceTicket grantServiceTicket(final String id, final Service service, AppsCasDetails casDetails, final ExpirationPolicy expirationPolicy,
+    public synchronized ServiceTicket grantServiceTicket(final String id, final Service service, ClientAppsCASDetails casDetails, final ExpirationPolicy expirationPolicy,
                                                          final boolean credentialProvided, final boolean onlyTrackMostRecentSession) {
         final ServiceTicket serviceTicket = new ServiceTicketImpl(authentication,casDetails);
         return serviceTicket;

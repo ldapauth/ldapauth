@@ -9,7 +9,7 @@ import com.ldapauth.authz.saml20.binding.BindingAdapter;
 import com.ldapauth.authz.saml20.xml.IssuerGenerator;
 import com.ldapauth.constants.ConstsBoolean;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import org.opensaml.Configuration;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.EncryptedAssertion;
@@ -44,7 +44,7 @@ public class AuthnResponseGenerator {
 	}
 
 
-	public Response generateAuthnResponse(  AppsSamlDetails saml20Details,
+	public Response generateAuthnResponse(  ClientAppsSAMLDetails saml20Details,
 											AuthnRequestInfo authnRequestInfo,
 											HashMap<String,String>attributeMap,
 											BindingAdapter bindingAdapter,

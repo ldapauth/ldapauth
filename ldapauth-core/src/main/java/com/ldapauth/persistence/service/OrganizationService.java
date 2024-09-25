@@ -91,4 +91,12 @@ public interface OrganizationService extends IService<Organization> {
      * @return
      */
     boolean updateLdapDnAndLdapIdById(Long id,String ldapId,String ldapDn);
+
+    /**
+     * 修改ldapdn
+     * @param ldapId
+     * @param ldapDn
+     * @return
+     */
+    boolean updateLdapDnAndByLdapId(String ldapId,String ldapDn);
 }

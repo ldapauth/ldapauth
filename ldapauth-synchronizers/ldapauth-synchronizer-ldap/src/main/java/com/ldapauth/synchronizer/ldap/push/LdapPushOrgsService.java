@@ -1,10 +1,13 @@
 package com.ldapauth.synchronizer.ldap.push;
 
+import com.ldapauth.constants.ldap.ActiveDirectoryUser;
+import com.ldapauth.persistence.service.GroupService;
 import com.ldapauth.persistence.service.OrganizationService;
+import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.pojo.entity.Organization;
 import com.ldapauth.pojo.entity.Synchronizers;
-import com.ldapauth.provision.abstracts.AbstractBaseHandle;
-import com.ldapauth.provision.interfaces.BaseHandle;
+import com.ldapauth.synchronizer.abstracts.AbstractPushSynchronizer;
+import com.ldapauth.synchronizer.ISynchronizerPushService;
 import com.ldapauth.util.LdapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -19,10 +22,15 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class LdapPushOrgsService extends AbstractBaseHandle implements BaseHandle {
+public class LdapPushOrgsService extends AbstractPushSynchronizer implements ISynchronizerPushService {
 
     @Autowired
     OrganizationService organizationService;
+
+    @Autowired
+    UserInfoService userInfoService;
+    @Autowired
+    GroupService groupService;
 
     @Override
     public boolean add(Synchronizers synchronizer, Object data) {
@@ -136,6 +144,8 @@ public class LdapPushOrgsService extends AbstractBaseHandle implements BaseHandl
                 ModificationItem[] modificationItems = new ModificationItem[1];
                 modificationItems[0]=new ModificationItem(DirContext.REPLACE_ATTRIBUTE,new BasicAttribute("ou",organization.getOrgName()));
                 dirContext.modifyAttributes(dn, modificationItems);
+                //修改子节点
+                dnameChildNodes(dirContext,dn);
                 //成功后修改组织ldapDn
                 organizationService.updateLdapDnAndLdapIdById(organization.getId(),null,dn);
             }
@@ -181,5 +191,54 @@ public class LdapPushOrgsService extends AbstractBaseHandle implements BaseHandl
     @Override
     public boolean password(Synchronizers synchronizer, Object data) {
         return false;
+    }
+
+    /**
+     * 修改所有组织子节点
+     */
+    private void dnameChildNodes(DirContext dirContext,String dn) {
+        try {
+            //设置所有属性
+            String[] attrts = new String[]{"*", "+"};
+            SearchControls constraints = new SearchControls();
+            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            constraints.setReturningAttributes(attrts);
+            NamingEnumeration<SearchResult> results = dirContext.search(dn, "(|(objectClass=OrganizationalUnit)(objectClass=inetOrgPerson)(objectClass=groupOfNames))", constraints);
+            while (null != results && results.hasMoreElements()) {
+                Object obj = results.nextElement();
+                if (obj instanceof SearchResult) {
+                    SearchResult sr = (SearchResult) obj;
+                    if (StringUtils.isEmpty(sr.getName())) {
+                        log.info("Skip '' or 'OU=Domain Controllers' .");
+                        continue;
+                    }
+                    HashMap<String, Attribute> attributeMap = new HashMap<>();
+                    NamingEnumeration<? extends Attribute> attrs = sr.getAttributes().getAll();
+                    while (null != attrs && attrs.hasMoreElements()) {
+                        Attribute objAttrs = attrs.nextElement();
+                        log.trace("attribute {} : {}",
+                                objAttrs.getID(),
+                                LdapUtils.getAttrStringValue(objAttrs)
+                        );
+                        attributeMap.put(objAttrs.getID().toLowerCase(), objAttrs);
+                    }
+                    String ldapDn = sr.getNameInNamespace();
+                    String ldapId = LdapUtils.getAttributeStringValue("entryUUID", attributeMap);
+                    if(ldapDn.startsWith("OU")) {
+                        //修改组织ldapDn
+                        organizationService.updateLdapDnAndByLdapId(ldapId,ldapDn);
+                    } else if(ldapDn.startsWith("UID")) {
+                        //成功后用户ldapDn
+                        userInfoService.updateLdapDnAndByLdapId(ldapId,ldapDn);
+                    } else if(ldapDn.startsWith("CN")) {
+                        //修改分组
+                        groupService.updateLdapDnAndByLdapId(ldapId,ldapDn);
+                    }
+                }
+            }
+
+        } catch (Exception e){
+            log.error("error,",e);
+        }
     }
 }

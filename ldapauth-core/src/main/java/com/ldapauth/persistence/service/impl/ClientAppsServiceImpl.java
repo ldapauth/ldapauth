@@ -18,13 +18,13 @@ import com.ldapauth.crypto.keystore.KeyStoreUtil;
 import com.ldapauth.crypto.password.PasswordReciprocal;
 import com.ldapauth.exception.BusinessException;
 import com.ldapauth.persistence.mapper.*;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.*;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsJwtDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsOidcDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsOIDCDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.pojo.vo.Result;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -45,7 +45,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
-import java.time.Duration;
 import java.util.*;
 
 /**
@@ -54,7 +53,7 @@ import java.util.*;
  */
 @Slf4j
 @Service
-public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements AppsService {
+public class ClientAppsServiceImpl extends ServiceImpl<ClientAppsMapper, ClientApps> implements ClientAppsService {
     @Autowired
     AppsOidcDetailsMapper appsOidcDetailsMapper;
 
@@ -68,7 +67,7 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     AppsCasDetailsMapper appsCasDetailsMapper;
 
     @Autowired
-    AppsMapper mapper;
+    ClientAppsMapper mapper;
 
     @Autowired
     IdentifierGenerator identifierGenerator;
@@ -79,7 +78,7 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Autowired
     CacheService cacheService;
     @Override
-    public List<Apps> myApps(Long userId) {
+    public List<ClientApps> myApps(Long userId) {
         return mapper.myApps(userId);
     }
 
@@ -87,29 +86,29 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> oidcCreate(AppsOidcDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
 
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         //app.setInstId(signedPrincipal.getInstId());
         app.setProtocol(0);
         //生成clientId和密钥
         buildClient(app);
         encodeSecret(app);
         super.save(app);
-        AppsOidcDetails details = BeanUtil.copyProperties(dto.getDetails(), AppsOidcDetails.class);
+        ClientAppsOIDCDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsOIDCDetails.class);
         details.setAppId(app.getId());
         //details.setInstId(signedPrincipal.getInstId());
         details.setClientId(app.getClientId());
@@ -130,19 +129,19 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> oidcUpdate(AppsOidcDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         //排除当前ID
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
@@ -150,23 +149,23 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
 
 
 
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         app.setProtocol(0);
         app.setClientSecret(dto.getDetails().getClientSecret());
         encodeSecret(app);
 
         super.updateById(app);
-        AppsOidcDetails details = BeanUtil.copyProperties(dto.getDetails(), AppsOidcDetails.class) ;
+        ClientAppsOIDCDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsOIDCDetails.class) ;
         details.setAppId(app.getId());
         details.setStatus(app.getStatus());
         details.setClientSecret(app.getClientSecret());
         //details.setInstId(signedPrincipal.getInstId());
 
-        LambdaQueryWrapper<AppsOidcDetails> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(AppsOidcDetails::getAppId,app.getId());
+        LambdaQueryWrapper<ClientAppsOIDCDetails> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(ClientAppsOIDCDetails::getAppId,app.getId());
         //updateWrapper.eq(AppsOAuth2ClientDetails::getInstId,app.getInstId());
 
-        AppsOidcDetails oidcDetails = appsOidcDetailsMapper.selectOne(updateWrapper);
+        ClientAppsOIDCDetails oidcDetails = appsOidcDetailsMapper.selectOne(updateWrapper);
         //存在签名
         if(details.getIsSignature().equalsIgnoreCase(IDPCacheConstants.YES)) {
             //更新时判断之前的算法和更新的算法是否一直，一直则不更新签名密钥
@@ -184,14 +183,14 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     }
 
 
-    private void encodeSecret(Apps app){
+    private void encodeSecret(ClientApps app){
         if(StringUtils.isNotBlank(app.getClientSecret())){
             String encodeSecret = PasswordReciprocal.getInstance().encode(app.getClientSecret());
             app.setClientSecret(encodeSecret);
         }
     }
 
-    private void decoderSecret(Apps app){
+    private void decoderSecret(ClientApps app){
         try {
             if (StringUtils.isNotBlank(app.getClientSecret())) {
                 String decodeSecret = PasswordReciprocal.getInstance().decoder(app.getClientSecret());
@@ -206,28 +205,28 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> samlCreate(AppsSamlDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         //app.setInstId(signedPrincipal.getInstId());
         app.setProtocol(1);
         //生成clientId和密钥
         buildClient(app);
         encodeSecret(app);
         super.save(app);
-        AppsSamlDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsSamlDetails.class);
+        ClientAppsSAMLDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsSAMLDetails.class);
         if (StringUtils.isNotEmpty(dto.getDetails().getB64Encoder())) {
             String b64Encoder = dto.getDetails().getB64Encoder();
             try {
@@ -266,28 +265,28 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> samlUpdate(AppsSamlDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         //排除当前ID
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         app.setProtocol(1);
         encodeSecret(app);
         super.updateById(app);
-        AppsSamlDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsSamlDetails.class);
+        ClientAppsSAMLDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsSAMLDetails.class);
 
         if (StringUtils.isNotEmpty(dto.getDetails().getB64Encoder())) {
             String b64Encoder = dto.getDetails().getB64Encoder();
@@ -314,8 +313,8 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         details.setStatus(app.getStatus());
         //details.setInstId(signedPrincipal.getInstId());
 
-        LambdaQueryWrapper<AppsSamlDetails> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(AppsSamlDetails::getAppId,app.getId());
+        LambdaQueryWrapper<ClientAppsSAMLDetails> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(ClientAppsSAMLDetails::getAppId,app.getId());
         //updateWrapper.eq(AppsSamlDetails::getInstId,app.getInstId());
         appsSamlDetailsMapper.update(details,updateWrapper);
         //details.setDeviceType(app.getDeviceType());
@@ -328,28 +327,28 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> jwtCreate(AppsJwtDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         //app.setInstId(signedPrincipal.getInstId());
         app.setProtocol(2);
         //生成clientId和密钥
         buildClient(app);
         encodeSecret(app);
         super.save(app);
-        AppsJwtDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsJwtDetails.class) ;
+        ClientAppsJWTDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsJWTDetails.class) ;
         details.setAppId(app.getId());
         //details.setInstId(signedPrincipal.getInstId());
         details.setStatus(app.getStatus());
@@ -369,36 +368,36 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> jwtUpdate(AppsJwtDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         //排除当前ID
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         app.setProtocol(2);
         encodeSecret(app);
         super.updateById(app);
-        AppsJwtDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsJwtDetails.class) ;
+        ClientAppsJWTDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsJWTDetails.class) ;
         details.setAppId(app.getId());
         //details.setInstId(signedPrincipal.getInstId());
         details.setStatus(app.getStatus());
 
-        LambdaQueryWrapper<AppsJwtDetails> selectLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        selectLambdaQueryWrapper.eq(AppsJwtDetails::getAppId,app.getId());
+        LambdaQueryWrapper<ClientAppsJWTDetails> selectLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        selectLambdaQueryWrapper.eq(ClientAppsJWTDetails::getAppId,app.getId());
         //selectLambdaQueryWrapper.eq(AppsJwtDetails::getInstId,app.getInstId());
-        AppsJwtDetails jwtDetails = appsJwtDetailsMapper.selectOne(selectLambdaQueryWrapper);
+        ClientAppsJWTDetails jwtDetails = appsJwtDetailsMapper.selectOne(selectLambdaQueryWrapper);
         //存在签名
          if(details.getIsSignature().equalsIgnoreCase(IDPCacheConstants.YES)) {
             //更新时判断之前的算法和更新的算法是否一直，一直则不更新签名密钥
@@ -408,8 +407,8 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         } else {
             details.setSignatureKey("");
         }
-        LambdaQueryWrapper<AppsJwtDetails> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(AppsJwtDetails::getAppId,app.getId());
+        LambdaQueryWrapper<ClientAppsJWTDetails> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(ClientAppsJWTDetails::getAppId,app.getId());
         //updateWrapper.eq(AppsJwtDetails::getInstId,app.getInstId());
         appsJwtDetailsMapper.update(details,updateWrapper);
         //details.setDeviceType(app.getDeviceType());
@@ -421,29 +420,29 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> casCreate(AppsCasDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
        // queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
        // queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
 
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         //app.setInstId(signedPrincipal.getInstId());
         app.setProtocol(3);
         //生成clientId和密钥
         buildClient(app);
         encodeSecret(app);
         super.save(app);
-        AppsCasDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsCasDetails.class) ;
+        ClientAppsCASDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsCASDetails.class) ;
         details.setAppId(app.getId());
         details.setStatus(app.getStatus());
         //details.setInstId(signedPrincipal.getInstId());
@@ -456,33 +455,33 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Override
     public Result<String> casUpdate(AppsCasDTO dto) {
         //SignedPrincipal signedPrincipal = AuthorizationUtils.getCurrentUser();
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getAppName,dto.getApp().getAppName());
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getAppName,dto.getApp().getAppName());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         //排除当前ID
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
         List list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用名称已重复");
         }
         queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.notIn(Apps::getId,dto.getApp().getId());
-        queryWrapper.eq(Apps::getAppCode,dto.getApp().getAppCode());
+        queryWrapper.notIn(ClientApps::getId,dto.getApp().getId());
+        queryWrapper.eq(ClientApps::getAppCode,dto.getApp().getAppCode());
         //queryWrapper.eq(Apps::getInstId,signedPrincipal.getInstId());
         list = this.list(queryWrapper);
         if (Objects.nonNull(list) && !list.isEmpty() && list.size()>0) {
             return Result.failed("应用编码已重复");
         }
-        Apps app = BeanUtil.copyProperties(dto.getApp(),Apps.class);
+        ClientApps app = BeanUtil.copyProperties(dto.getApp(), ClientApps.class);
         app.setProtocol(3);
         encodeSecret(app);
         super.updateById(app);
-        AppsCasDetails details = BeanUtil.copyProperties(dto.getDetails(),AppsCasDetails.class) ;
+        ClientAppsCASDetails details = BeanUtil.copyProperties(dto.getDetails(), ClientAppsCASDetails.class) ;
         details.setAppId(app.getId());
         details.setStatus(app.getStatus());
         //details.setInstId(signedPrincipal.getInstId());
-        LambdaQueryWrapper<AppsCasDetails> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(AppsCasDetails::getAppId,app.getId());
+        LambdaQueryWrapper<ClientAppsCASDetails> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(ClientAppsCASDetails::getAppId,app.getId());
         //updateWrapper.eq(AppsCasDetails::getInstId,app.getInstId());
         appsCasDetailsMapper.update(details,updateWrapper);
         cacheService.deleteObject(ConstsCacheData.CAS_CACGE_LIST);
@@ -492,19 +491,19 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
 
     @Override
     public Result<AppsDetails> getDetails(Long id) {
-        Apps app = super.getById(id);
+        ClientApps app = super.getById(id);
         if (Objects.isNull(app)) {
             return Result.failed("查询失败");
         }
         decoderSecret(app);
         //获取oidc扩展配置
         if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 0) {
-            AppsDetails<AppsOidcDetails> details = new AppsDetails();
+            AppsDetails<ClientAppsOIDCDetails> details = new AppsDetails();
             details.setApp(app);
-            LambdaQueryWrapper<AppsOidcDetails> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AppsOidcDetails::getAppId,id);
+            LambdaQueryWrapper<ClientAppsOIDCDetails> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ClientAppsOIDCDetails::getAppId,id);
             //queryWrapper.eq(AppsOAuth2ClientDetails::getInstId,app.getInstId());
-            AppsOidcDetails oauthDetails = appsOidcDetailsMapper.selectOne(queryWrapper);
+            ClientAppsOIDCDetails oauthDetails = appsOidcDetailsMapper.selectOne(queryWrapper);
             if (Objects.nonNull(oauthDetails)) {
                 oauthDetails.setClientSecret(app.getClientSecret());
                 details.setDetails(oauthDetails);
@@ -513,12 +512,12 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         }
         //获取saml扩展配置
         else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 1) {
-            AppsDetails<AppsSamlDetails> details = new AppsDetails();
+            AppsDetails<ClientAppsSAMLDetails> details = new AppsDetails();
             details.setApp(app);
-            LambdaQueryWrapper<AppsSamlDetails> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AppsSamlDetails::getAppId,id);
+            LambdaQueryWrapper<ClientAppsSAMLDetails> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ClientAppsSAMLDetails::getAppId,id);
             //queryWrapper.eq(AppsSamlDetails::getInstId,app.getInstId());
-            AppsSamlDetails samlDetails = appsSamlDetailsMapper.selectOne(queryWrapper);
+            ClientAppsSAMLDetails samlDetails = appsSamlDetailsMapper.selectOne(queryWrapper);
             if (Objects.nonNull(samlDetails)) {
                 details.setDetails(samlDetails);
             }
@@ -526,12 +525,12 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         }
         //获取jwt扩展配置
         else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 2) {
-            AppsDetails<AppsJwtDetails> details = new AppsDetails();
+            AppsDetails<ClientAppsJWTDetails> details = new AppsDetails();
             details.setApp(app);
-            LambdaQueryWrapper<AppsJwtDetails> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AppsJwtDetails::getAppId,id);
+            LambdaQueryWrapper<ClientAppsJWTDetails> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ClientAppsJWTDetails::getAppId,id);
             //queryWrapper.eq(AppsJwtDetails::getInstId,app.getInstId());
-            AppsJwtDetails jwtDetails = appsJwtDetailsMapper.selectOne(queryWrapper);
+            ClientAppsJWTDetails jwtDetails = appsJwtDetailsMapper.selectOne(queryWrapper);
             if (Objects.nonNull(jwtDetails)) {
                 details.setDetails(jwtDetails);
             }
@@ -539,12 +538,12 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         }
         //获取cas扩展配置
         else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 3) {
-            AppsDetails<AppsCasDetails> details = new AppsDetails();
+            AppsDetails<ClientAppsCASDetails> details = new AppsDetails();
             details.setApp(app);
-            LambdaQueryWrapper<AppsCasDetails> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AppsCasDetails::getAppId,id);
+            LambdaQueryWrapper<ClientAppsCASDetails> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ClientAppsCASDetails::getAppId,id);
             //queryWrapper.eq(AppsCasDetails::getInstId,app.getInstId());
-            AppsCasDetails casdetails = appsCasDetailsMapper.selectOne(queryWrapper);
+            ClientAppsCASDetails casdetails = appsCasDetailsMapper.selectOne(queryWrapper);
             if (Objects.nonNull(casdetails)) {
                 details.setDetails(casdetails);
             }
@@ -556,13 +555,13 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     }
 
     @Override
-    public AppsDetails<AppsOidcDetails> getDetailsClientId(String clientId) {
-        LambdaQueryWrapper<Apps> appQuery = new LambdaQueryWrapper();
-        appQuery.eq(Apps::getClientId,clientId);
-        Apps app = super.getOne(appQuery);
+    public AppsDetails<ClientAppsOIDCDetails> getDetailsClientId(String clientId) {
+        LambdaQueryWrapper<ClientApps> appQuery = new LambdaQueryWrapper();
+        appQuery.eq(ClientApps::getClientId,clientId);
+        ClientApps app = super.getOne(appQuery);
         if (Objects.isNull(app)) {
              appQuery = new LambdaQueryWrapper();
-             appQuery.eq(Apps::getId,clientId);
+             appQuery.eq(ClientApps::getId,clientId);
              app = super.getOne(appQuery);
         }
         if (Objects.isNull(app)) {
@@ -571,11 +570,11 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
         Long id = app.getId();
         //获取oidc扩展配置
         if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 0) {
-            AppsDetails<AppsOidcDetails> details = new AppsDetails();
+            AppsDetails<ClientAppsOIDCDetails> details = new AppsDetails();
             details.setApp(app);
-            LambdaQueryWrapper<AppsOidcDetails> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(AppsOidcDetails::getAppId,id);
-            AppsOidcDetails oauthDetails = appsOidcDetailsMapper.selectOne(queryWrapper);
+            LambdaQueryWrapper<ClientAppsOIDCDetails> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(ClientAppsOIDCDetails::getAppId,id);
+            ClientAppsOIDCDetails oauthDetails = appsOidcDetailsMapper.selectOne(queryWrapper);
             if (Objects.isNull(oauthDetails)) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST.value(),"无法获取扩展属性");
             }
@@ -587,16 +586,16 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
 
     @Override
     public int updateStatus(ArrayList<Long> ids, int i) {
-        int count = mapper.update(new LambdaUpdateWrapper<Apps>().in(Apps::getId,ids).set(Apps::getStatus,i));
+        int count = mapper.update(new LambdaUpdateWrapper<ClientApps>().in(ClientApps::getId,ids).set(ClientApps::getStatus,i));
         if (count > 0) {
             for(Long id : ids) {
-                Apps app = super.getById(id);
+                ClientApps app = super.getById(id);
                 //更新oauth扩展配置
                 if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 0) {
-                    LambdaQueryWrapper<AppsOidcDetails> updateWrapper = new LambdaQueryWrapper<>();
-                    updateWrapper.eq(AppsOidcDetails::getAppId,id);
+                    LambdaQueryWrapper<ClientAppsOIDCDetails> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(ClientAppsOIDCDetails::getAppId,id);
                     //updateWrapper.eq(AppsOAuth2ClientDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
-                    AppsOidcDetails details = new AppsOidcDetails();
+                    ClientAppsOIDCDetails details = new ClientAppsOIDCDetails();
                     details.setStatus(i);
                     appsOidcDetailsMapper.update(details,updateWrapper);
                     //details = appsOAuth2ClientDetailsMapper.selectOne(updateWrapper);
@@ -605,10 +604,10 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
                 }
                 //更新saml扩展配置
                 else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 1) {
-                    LambdaQueryWrapper<AppsSamlDetails> updateWrapper = new LambdaQueryWrapper<>();
-                    updateWrapper.eq(AppsSamlDetails::getAppId,id);
+                    LambdaQueryWrapper<ClientAppsSAMLDetails> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(ClientAppsSAMLDetails::getAppId,id);
                     //updateWrapper.eq(AppsSamlDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
-                    AppsSamlDetails details = new AppsSamlDetails();
+                    ClientAppsSAMLDetails details = new ClientAppsSAMLDetails();
                     details.setStatus(i);
                     appsSamlDetailsMapper.update(details,updateWrapper);
                     //details = appsSamlDetailsMapper.selectOne(updateWrapper);
@@ -618,10 +617,10 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
                 }
                 //更新jwt扩展配置
                 else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 2) {
-                    LambdaQueryWrapper<AppsJwtDetails> updateWrapper = new LambdaQueryWrapper<>();
-                    updateWrapper.eq(AppsJwtDetails::getAppId,id);
+                    LambdaQueryWrapper<ClientAppsJWTDetails> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(ClientAppsJWTDetails::getAppId,id);
                     //updateWrapper.eq(AppsJwtDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
-                    AppsJwtDetails details = new AppsJwtDetails();
+                    ClientAppsJWTDetails details = new ClientAppsJWTDetails();
                     details.setStatus(i);
                     appsJwtDetailsMapper.update(details,updateWrapper);
                     //details = AppsJwtDetailsMapper.selectOne(updateWrapper);
@@ -631,10 +630,10 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
                 }
                 //更新cas扩展配置
                 else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 3) {
-                    LambdaQueryWrapper<AppsCasDetails> updateWrapper = new LambdaQueryWrapper<>();
-                    updateWrapper.eq(AppsCasDetails::getAppId,id);
+                    LambdaQueryWrapper<ClientAppsCASDetails> updateWrapper = new LambdaQueryWrapper<>();
+                    updateWrapper.eq(ClientAppsCASDetails::getAppId,id);
                     //updateWrapper.eq(AppsCasDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
-                    AppsCasDetails details = new AppsCasDetails();
+                    ClientAppsCASDetails details = new ClientAppsCASDetails();
                     details.setStatus(i);
                     appsCasDetailsMapper.update(details,updateWrapper);
                 }
@@ -647,43 +646,43 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     @Transactional(isolation = Isolation.READ_COMMITTED,rollbackFor = Exception.class)
     @Override
     public int deleteBatch(ArrayList<Long> ids) {
-        List<Apps> list = this.listByIds(ids);
-        for(Apps app :list) {
+        List<ClientApps> list = this.listByIds(ids);
+        for(ClientApps app :list) {
             //检查是否存在启用的应用
             if (app.getStatus().intValue() == 0) {
                 throw new BusinessException(400,"请先禁用应用后在删除");
             }
         }
         for (Long id : ids) {
-            Apps app = super.getById(id);
+            ClientApps app = super.getById(id);
             //更新oauth扩展配置
             if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 0) {
-                LambdaQueryWrapper<AppsOidcDetails> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(AppsOidcDetails::getAppId,id);
+                LambdaQueryWrapper<ClientAppsOIDCDetails> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ClientAppsOIDCDetails::getAppId,id);
                 //wrapper.eq(AppsOAuth2ClientDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
                 appsOidcDetailsMapper.delete(wrapper);
                 //RedisUtils.deleteObject(IDPCacheConstants.OAUTH_CACHE_PREFIX+app.getClientId());
             }
             //更新saml扩展配置
             else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 1) {
-                LambdaQueryWrapper<AppsSamlDetails> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(AppsSamlDetails::getAppId,id);
+                LambdaQueryWrapper<ClientAppsSAMLDetails> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ClientAppsSAMLDetails::getAppId,id);
                 //wrapper.eq(AppsSamlDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
                 appsSamlDetailsMapper.delete(wrapper);
                 //RedisUtils.deleteObject(IDPCacheConstants.SAML_CACHE_PREFIX + id);
             }
             //更新jwt扩展配置
             else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 2) {
-                LambdaQueryWrapper<AppsJwtDetails> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(AppsJwtDetails::getAppId,id);
+                LambdaQueryWrapper<ClientAppsJWTDetails> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ClientAppsJWTDetails::getAppId,id);
                 //wrapper.eq(AppsJwtDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
                 appsJwtDetailsMapper.delete(wrapper);
                 //RedisUtils.deleteObject(IDPCacheConstants.JWT_CACHE_PREFIX+app.getId());
             }
             //删除cas扩展配置
             else if (Objects.nonNull(app.getProtocol()) && app.getProtocol().intValue() == 3) {
-                LambdaQueryWrapper<AppsCasDetails> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(AppsCasDetails::getAppId,id);
+                LambdaQueryWrapper<ClientAppsCASDetails> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(ClientAppsCASDetails::getAppId,id);
                 //wrapper.eq(AppsCasDetails::getInstId,AuthorizationUtils.getCurrentUser().getInstId());
                 appsCasDetailsMapper.delete(wrapper);
             }
@@ -696,14 +695,14 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
-    public AppsCasDetails getAppDetails(String service, boolean isMach) {
-        List<AppsCasDetails> list =  cacheService.getCacheObject(ConstsCacheData.CAS_CACGE_LIST);
+    public ClientAppsCASDetails getAppDetails(String service, boolean isMach) {
+        List<ClientAppsCASDetails> list =  cacheService.getCacheObject(ConstsCacheData.CAS_CACGE_LIST);
         if(Objects.isNull(list)) {
             list = appsCasDetailsMapper.selectList(new LambdaQueryWrapper<>());
             cacheService.setCacheObject(ConstsCacheData.CAS_CACGE_LIST,list);
         }
         if (CollectionUtil.isNotEmpty(list)) {
-           for(AppsCasDetails details : list) {
+           for(ClientAppsCASDetails details : list) {
                //匹配url
                String[] serviceList = StringUtils.split(service,",");
                for (String dbservice : serviceList) {
@@ -717,20 +716,20 @@ public class AppsServiceImpl  extends ServiceImpl<AppsMapper, Apps> implements A
     }
 
     @Override
-    public AppsJwtDetails getAppsJwtDetails(Long appId) {
-        LambdaQueryWrapper<AppsJwtDetails> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(AppsJwtDetails::getAppId,appId);
+    public ClientAppsJWTDetails getAppsJwtDetails(Long appId) {
+        LambdaQueryWrapper<ClientAppsJWTDetails> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientAppsJWTDetails::getAppId,appId);
         return appsJwtDetailsMapper.selectOne(queryWrapper);
     }
 
     @Override
-    public Apps getByClientId(String clientId, boolean isMach) {
-        LambdaQueryWrapper<Apps> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Apps::getClientId,clientId);
+    public ClientApps getByClientId(String clientId, boolean isMach) {
+        LambdaQueryWrapper<ClientApps> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClientApps::getClientId,clientId);
         return super.getOne(queryWrapper);
     }
 
-    private void buildClient(Apps app){
+    private void buildClient(ClientApps app){
         Long id = identifierGenerator.nextId(app).longValue();
         String clientId = Base64Utils.base64UrlEncode((String.valueOf(id)).getBytes());
         app.setClientId(clientId);

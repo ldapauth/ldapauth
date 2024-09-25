@@ -1,14 +1,16 @@
-package com.ldapauth.synchronizer;
+package com.ldapauth.synchronizer.abstracts;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.persistence.service.*;
 import com.ldapauth.pojo.entity.*;
+import com.ldapauth.util.LdapUtils;
 import com.ldapauth.utils.PasswordGenerator;
 import com.ldapauth.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.naming.directory.DirContext;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,41 @@ public abstract class AbstractSynchronizerService {
     public Synchronizers getSynchronizer() {
         return synchronizer;
     }
+
+    /**
+     * 获取连接池
+     * @param synchronizer
+     * @return
+     */
+    public DirContext getDirContext(Synchronizers synchronizer){
+        DirContext dirContext = null;
+        try {
+            if (synchronizer.getBaseApi().startsWith("ldaps") &&
+                    Objects.nonNull(synchronizer.getTrustStore()) &&
+                    synchronizer.getOpenssl()) {
+                LdapUtils utils = new LdapUtils(
+                        synchronizer.getBaseApi(),
+                        synchronizer.getClientId(),
+                        synchronizer.getClientSecret(),
+                        synchronizer.getBaseDn());
+                utils.setSsl(true);
+                utils.setTrustStore(synchronizer.getTrustStore());
+                utils.setTrustStorePassword(synchronizer.getTrustStorePassword());
+                dirContext = utils.openConnection();
+            } else {
+                LdapUtils utils = new LdapUtils(
+                        synchronizer.getBaseApi(),
+                        synchronizer.getClientId(),
+                        synchronizer.getClientSecret(),
+                        synchronizer.getBaseDn());
+                dirContext = utils.openConnection();
+            }
+        }catch (Exception e){
+            log.error("error",e);
+        }
+        return dirContext;
+    }
+
 
     /**
      * 插入历史记录

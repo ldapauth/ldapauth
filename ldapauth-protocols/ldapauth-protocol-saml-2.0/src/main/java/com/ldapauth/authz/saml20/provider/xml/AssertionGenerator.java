@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.web.WebContext;
 import org.joda.time.DateTime;
 import com.ldapauth.authz.saml.service.IDService;
@@ -58,7 +58,7 @@ public class AssertionGenerator {
 	}
 
 	public Assertion generateAssertion(
-							AppsSamlDetails saml20Details,
+							ClientAppsSAMLDetails saml20Details,
 							BindingAdapter bindingAdapter,
 							String assertionConsumerURL,
 							String inResponseTo,

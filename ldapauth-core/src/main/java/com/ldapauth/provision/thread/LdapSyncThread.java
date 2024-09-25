@@ -1,13 +1,16 @@
 package com.ldapauth.provision.thread;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.ldapauth.constants.ConstsSynchronizers;
 import com.ldapauth.persistence.service.SynchronizersService;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.provision.ProvisionAction;
 import com.ldapauth.provision.ProvisionMessage;
 import com.ldapauth.provision.ProvisionTopic;
-import com.ldapauth.provision.interfaces.BaseHandle;
+import com.ldapauth.synchronizer.ISynchronizerPushService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +20,7 @@ import java.util.concurrent.Executors;
  *
  */
 @Slf4j
+@Component
 public class LdapSyncThread {
     SynchronizersService synchronizersService;
     String topic;
@@ -24,41 +28,40 @@ public class LdapSyncThread {
     ProvisionMessage provisionMessage;
 
     ExecutorService executorService = Executors.newFixedThreadPool(200);
-    public LdapSyncThread(
+
+
+    public void run(
             SynchronizersService synchronizersService,
             String topic,
-            ProvisionMessage provisionMessage
-    ) {
+            ProvisionMessage provisionMessage) {
+
         this.topic = topic;
         this.provisionMessage = provisionMessage;
         this.synchronizersService = synchronizersService;
-    }
 
-
-    public void run() {
         Synchronizers synchronizers = getLdapConfig();
-        //循环处理
-        if (Objects.nonNull(synchronizers) && synchronizers.getStatus().intValue() == 0){
+
+        if (Objects.nonNull(synchronizers)){
             //多线程执行
-            executorService.execute(() ->  handle(synchronizers));
+            executorService.execute(() ->  synchronizerPush(synchronizers));
         }
         log.debug("send to Message Queue finished .");
     }
 
-    private void handle(Synchronizers connector){
-        BaseHandle baseHandle = getHandle();
-        if (Objects.isNull(baseHandle)) {
+    private void synchronizerPush(Synchronizers connector){
+        ISynchronizerPushService synchronizerPushService = getSynchronizerPushService(connector);
+        if (Objects.isNull(synchronizerPushService)) {
             log.error("执行器不存在！");
             return;
         }
         if (this.provisionMessage.getActionType().equalsIgnoreCase(ProvisionAction.CREATE_ACTION)) {
-            baseHandle.add(connector,provisionMessage.getContent());
+            synchronizerPushService.add(connector,provisionMessage.getContent());
         } else if (this.provisionMessage.getActionType().equalsIgnoreCase(ProvisionAction.UPDATE_ACTION)) {
-            baseHandle.update(connector,provisionMessage.getContent());
+            synchronizerPushService.update(connector,provisionMessage.getContent());
         } else if (this.provisionMessage.getActionType().equalsIgnoreCase(ProvisionAction.DELETE_ACTION)) {
-            baseHandle.delete(connector,provisionMessage.getContent());
+            synchronizerPushService.delete(connector,provisionMessage.getContent());
         } else if (this.provisionMessage.getActionType().equalsIgnoreCase(ProvisionAction.PASSWORD_ACTION)) {
-            baseHandle.password(connector,provisionMessage.getContent());
+            synchronizerPushService.password(connector,provisionMessage.getContent());
         }
     }
 
@@ -66,20 +69,34 @@ public class LdapSyncThread {
      * 获取执行器
      * @return
      */
-    private BaseHandle getHandle(){
-        BaseHandle baseHandle = null;
-        if (this.topic.equalsIgnoreCase(ProvisionTopic.ORG_TOPIC)) {
-            baseHandle = SpringUtil.getBean("ldapPushOrgsService");
-        } else if (this.topic.equalsIgnoreCase(ProvisionTopic.USERINFO_TOPIC)) {
-            baseHandle = SpringUtil.getBean("ldapPushUsersService");
-        } else if (this.topic.equalsIgnoreCase(ProvisionTopic.GROUP_TOPIC)) {
-            baseHandle = SpringUtil.getBean("ldapPushGroupService");
+    private ISynchronizerPushService getSynchronizerPushService(Synchronizers synchronizers){
+        ISynchronizerPushService synchronizerPushService = null;
+        //判断链接来源
+        if (ConstsSynchronizers.OPEN_LDAP.equalsIgnoreCase(synchronizers.getClassify())){
+            if (this.topic.equalsIgnoreCase(ProvisionTopic.ORG_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("ldapPushOrgsService");
+            } else if (this.topic.equalsIgnoreCase(ProvisionTopic.USERINFO_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("ldapPushUsersService");
+            } else if (this.topic.equalsIgnoreCase(ProvisionTopic.GROUP_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("ldapPushGroupService");
+            }
         }
-        return baseHandle;
+        //判断链接来源
+        else if (ConstsSynchronizers.ACTIVEDIRECTORY.equalsIgnoreCase(synchronizers.getClassify())){
+            if (this.topic.equalsIgnoreCase(ProvisionTopic.ORG_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("activedirectoryPushOrgsService");
+            } else if (this.topic.equalsIgnoreCase(ProvisionTopic.USERINFO_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("activedirectoryPushUsersService");
+            } else if (this.topic.equalsIgnoreCase(ProvisionTopic.GROUP_TOPIC)) {
+                synchronizerPushService = SpringUtil.getBean("activedirectoryPushGroupService");
+            }
+        }
+        return synchronizerPushService;
     }
 
+
     /**
-     * 获取所有LDAP的连接器
+     * 获取LDAP的连接器
      * @return
      */
     private Synchronizers getLdapConfig() {

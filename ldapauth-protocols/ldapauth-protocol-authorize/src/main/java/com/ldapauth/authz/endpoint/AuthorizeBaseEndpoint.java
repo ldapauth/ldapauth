@@ -1,8 +1,8 @@
 package com.ldapauth.authz.endpoint;
 
 import com.ldapauth.configuration.ApplicationConfig;
-import com.ldapauth.persistence.service.AppsService;
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
 import org.slf4j.Logger;
@@ -22,10 +22,10 @@ public class AuthorizeBaseEndpoint {
     protected ApplicationConfig applicationConfig;
 
 	@Autowired
-	protected AppsService appsService;
+	protected ClientAppsService appsService;
 
-	protected Apps getApp(Long id){
-		Apps  app= (Apps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
+	protected ClientApps getApp(Long id){
+		ClientApps app= (ClientApps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
 		if(Objects.isNull(id)) {
 			_logger.error("parameter for app id " + id + "  is null.");
 		}else {

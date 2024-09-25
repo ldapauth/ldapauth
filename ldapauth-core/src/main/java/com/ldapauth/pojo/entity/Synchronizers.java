@@ -1,9 +1,11 @@
 package com.ldapauth.pojo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ldapauth.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -57,7 +59,6 @@ public class Synchronizers extends BaseEntity {
 	@Schema(name = "groupFilter", description = "组过滤条件")
 	String groupFilter;
 
-
 	@Schema(name = "baseDomain", description = "域名")
 	String baseDomain;
 
@@ -70,7 +71,6 @@ public class Synchronizers extends BaseEntity {
 	@Schema(name = "userClientSecret", description = "客户端通讯录秘钥，主要用于企业微信")
 	String userClientSecret;
 
-
 	@Schema(name = "rootId", description = "根节点ID")
 	String rootId;
 
@@ -80,15 +80,20 @@ public class Synchronizers extends BaseEntity {
 	@Schema(name = "userFilter", description = "用户过滤条件")
 	String userFilter;
 
-
-
-
-
 	@Schema(name = "status", description = "状态: 0-启用; 1-禁用")
 	Integer status;
 
 	@Schema(name = "description", description = "备注")
 	String description;
 
+	@Schema(name = "openssl", description = "openssl")
+	Boolean openssl;
 
+	@Schema(name = "trustStore", description = "JKS文件")
+	@JsonIgnore
+	String trustStore;
+
+	@JsonIgnore
+	@Schema(name = "trustStorePassword", description = "JKS密码")
+	String trustStorePassword;
 }

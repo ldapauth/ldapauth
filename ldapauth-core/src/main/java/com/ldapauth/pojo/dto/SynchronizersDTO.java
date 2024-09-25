@@ -20,6 +20,9 @@ public class SynchronizersDTO {
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
 	Long id;
 
+	@Schema(name = "classify", description = "类型")
+	String classify;
+
 	@Schema(name = "cron", description = "任务执行表达式")
 	String cron;
 
@@ -66,6 +69,10 @@ public class SynchronizersDTO {
 	@Schema(name = "groupFilter", description = "组过滤条件")
 	String groupFilter;
 
+	@Schema(name = "openssl", description = "openssl")
+	boolean openssl;
 
+	@Schema(name = "sslFileId", description = "上传证书ID")
+	Long sslFileId;
 
 }

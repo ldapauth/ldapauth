@@ -1,7 +1,6 @@
 package com.ldapauth.persistence.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
@@ -18,9 +17,8 @@ import com.ldapauth.constants.ConstsSynchronizers;
 import com.ldapauth.exception.BusinessException;
 import com.ldapauth.persistence.mapper.SynchronizersMapper;
 import com.ldapauth.persistence.service.SynchronizersService;
-import com.ldapauth.pojo.dto.ChangeStatusDTO;
 import com.ldapauth.pojo.entity.Synchronizers;
-import com.ldapauth.synchronizer.ISynchronizerService;
+import com.ldapauth.synchronizer.ISynchronizerPullService;
 import com.ldapauth.util.LdapUtils;
 import com.ldapauth.utils.SpringUtils;
 import com.ldapauth.utils.WorkWeixinClient;
@@ -33,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.naming.directory.DirContext;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -59,6 +56,10 @@ public class SynchronizersServiceImpl extends ServiceImpl<SynchronizersMapper, S
     public boolean test(Synchronizers synchronizers) {
         boolean success = false;
         switch (synchronizers.getId().intValue()) {
+            //AD
+            case 0:
+                success = testLdap(synchronizers);
+                break;
             //OpenLdap
             case 1:
                 success = testLdap(synchronizers);
@@ -92,39 +93,39 @@ public class SynchronizersServiceImpl extends ServiceImpl<SynchronizersMapper, S
         if (synchronizers.getStatus().intValue() == ConstsStatus.DATA_INACTIVE) {
             throw new BusinessException(HttpStatus.BAD_REQUEST.value(),"任务已禁用");
         }
-        ISynchronizerService synchronizerService;
-        String key = "synchronizer:"+synchronizerId;
-        String lock = cacheService.getCacheObject(key);
-        if (Objects.nonNull(lock)) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST.value(),"任务触发频繁，请稍后再试.");
-        }
-        //设置锁
-        //cacheService.setCacheObject(key,"lock");
+        ISynchronizerPullService synchronizerService;
         switch (synchronizerId.intValue()) {
-            //OpenLdap
+            //openLdap OR activedirectory
             case 1:
-                synchronizerService = SpringUtils.getBean("ldapSynchronizerService");
-                synchronizerService.setSynchronizer(synchronizers);
-                //异步执行
-                executorService.execute(() -> synchronizerService.sync());
+                if (synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP)){
+                    synchronizerService = SpringUtils.getBean("ldapPullService");
+                    synchronizerService.setSynchronizer(synchronizers);
+                    //异步执行
+                    executorService.execute(() -> synchronizerService.sync());
+                } else if(synchronizers.getClassify().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY)) {
+                    synchronizerService = SpringUtils.getBean("activedirectoryPullService");
+                    synchronizerService.setSynchronizer(synchronizers);
+                    //异步执行
+                    executorService.execute(() -> synchronizerService.sync());
+                }
                 break;
             //钉钉
             case 2:
-                synchronizerService = SpringUtils.getBean("dingtalkSynchronizerService");
+                synchronizerService = SpringUtils.getBean("dingtalkPullService");
                 synchronizerService.setSynchronizer(synchronizers);
                 //异步执行
                 executorService.execute(() -> synchronizerService.sync());
                 break;
             //飞书
             case 3:
-                synchronizerService = SpringUtils.getBean("feishuSynchronizerService");
+                synchronizerService = SpringUtils.getBean("feishuPullService");
                 synchronizerService.setSynchronizer(synchronizers);
                 //异步执行
                 executorService.execute(() -> synchronizerService.sync());
                 break;
             //企业微信
             case 4:
-                synchronizerService = SpringUtils.getBean("workweixinSynchronizerService");
+                synchronizerService = SpringUtils.getBean("workweixinPullService");
                 synchronizerService.setSynchronizer(synchronizers);
                 //异步执行
                 executorService.execute(() -> synchronizerService.sync());
@@ -139,9 +140,11 @@ public class SynchronizersServiceImpl extends ServiceImpl<SynchronizersMapper, S
     @Override
     public Synchronizers LdapConfig() {
         Synchronizers synchronizers = cacheService.getCacheObject(ConstsCacheData.SYNC_LDAP_KEY);
-        if(Objects.isNull(synchronizers)) {
+        if (Objects.isNull(synchronizers)) {
             synchronizers = getById(1L);
-            cacheService.setCacheObject(ConstsCacheData.SYNC_LDAP_KEY,synchronizers);
+            if (Objects.nonNull(synchronizers) && synchronizers.getStatus().intValue() == 0) {
+                cacheService.setCacheObject(ConstsCacheData.SYNC_LDAP_KEY, synchronizers);
+            }
         }
         return synchronizers;
     }
@@ -188,25 +191,20 @@ public class SynchronizersServiceImpl extends ServiceImpl<SynchronizersMapper, S
             synchronizers.setCron("0 0 0/6 * * ?");
             synchronizers.setBaseApi("https://qyapi.weixin.qq.com");
             super.saveOrUpdate(synchronizers);
-
         }
     }
 
     @Transactional
     @Override
     public boolean save(Synchronizers entity) {
-        if (Objects.nonNull(entity) && entity.getId().intValue() == 1) {
-            cacheService.deleteObject(ConstsCacheData.SYNC_LDAP_KEY);
-        }
+        cacheService.deleteObject(ConstsCacheData.SYNC_LDAP_KEY);
         return super.save(entity);
     }
 
     @Transactional
     @Override
     public boolean updateById(Synchronizers entity) {
-        if (Objects.nonNull(entity) && entity.getId().intValue() == 1) {
-            cacheService.deleteObject(ConstsCacheData.SYNC_LDAP_KEY);
-        }
+        cacheService.deleteObject(ConstsCacheData.SYNC_LDAP_KEY);
         return super.updateById(entity);
     }
 
@@ -214,29 +212,72 @@ public class SynchronizersServiceImpl extends ServiceImpl<SynchronizersMapper, S
 
     /**
      * 链接LDAP
-     * @param synchronizers
+     * @param synchronizer
      * @return
      */
-    private boolean testLdap(Synchronizers synchronizers){
-        LdapUtils utils = new LdapUtils(
-                synchronizers.getBaseApi(),
-                synchronizers.getClientId(),
-                synchronizers.getClientSecret(),
-                synchronizers.getBaseDn());
+    private boolean testLdap(Synchronizers synchronizer){
         DirContext dirContext = null;
         try {
-            dirContext = utils.openConnection();
-            if (dirContext != null) {
+            if (synchronizer.getBaseApi().startsWith("ldaps") &&
+                    Objects.nonNull(synchronizer.getTrustStore()) &&
+                    synchronizer.getOpenssl()) {
+                LdapUtils utils = new LdapUtils(
+                        synchronizer.getBaseApi(),
+                        synchronizer.getClientId(),
+                        synchronizer.getClientSecret(),
+                        synchronizer.getBaseDn());
+                utils.setSsl(true);
+                utils.setTrustStore(synchronizer.getTrustStore());
+                utils.setTrustStorePassword(synchronizer.getTrustStorePassword());
+                dirContext = utils.openConnection();
+            } else {
+                LdapUtils utils = new LdapUtils(
+                        synchronizer.getBaseApi(),
+                        synchronizer.getClientId(),
+                        synchronizer.getClientSecret(),
+                        synchronizer.getBaseDn());
+                dirContext = utils.openConnection();
+            }
+            if (null != dirContext) {
                 return true;
             }
         } catch (Exception e){
-            throw new BusinessException(400, "无法连接openldap");
+            log.error("error",e);
+            throw new BusinessException(400, "无法连接ldap");
         } finally {
             if (Objects.nonNull(dirContext)) {
                 try {dirContext.close();} catch (Exception e){}
             }
         }
         return false;
+    }
+
+    public static void main(String[] args) {
+        String ldapUserDN = "ldapauth\\administrator";
+        String ldapPassword = "Shibl@123456";
+        String baseDn = "ldaps://WIN-S804Q1FEPS4.ldapauth.com";
+        // 初始化上下文环境
+        String trustStore= "/app/ldapauth/trustStore";
+        String trustStorePassword = "changeit";
+        DirContext ctx = null;
+        try {
+            LdapUtils utils = new LdapUtils(
+                    baseDn,
+                    ldapUserDN,
+                    ldapPassword,
+                    "OU=软件安全科技有限公司,DC=ldapauth,DC=com");
+            utils.setSsl(true);
+            utils.setTrustStore(trustStore);
+            utils.setTrustStorePassword(trustStorePassword);
+            ctx = utils.openConnection();
+            if(null != ctx) {
+                System.out.println("链接成功");
+            } else {
+                System.err.println("链接失败");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
     /**
      * 链接飞书

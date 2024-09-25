@@ -6,7 +6,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import com.ldapauth.crypto.cert.X509CertUtils;
 import com.ldapauth.exception.BusinessException;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.pojo.vo.MetadataVo;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.utils.MetadataDescriptorUtil;
@@ -58,7 +58,7 @@ public class MetadataController {
 	}
 
 	public MetadataVo resolveMetaData(InputStream inputStream) throws Exception {
-		AppsSamlDetails samlDetails = new AppsSamlDetails();
+		ClientAppsSAMLDetails samlDetails = new ClientAppsSAMLDetails();
 		X509Certificate trustCert = null;
 		EntityDescriptor entityDescriptor;
 		try {

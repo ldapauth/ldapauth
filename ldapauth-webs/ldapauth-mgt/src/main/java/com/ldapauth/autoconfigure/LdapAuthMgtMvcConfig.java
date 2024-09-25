@@ -8,6 +8,7 @@ import com.ldapauth.authn.web.interceptor.PermissionInterceptor;
 import com.ldapauth.authn.provider.AbstractAuthenticationProvider;
 import com.ldapauth.authn.web.interceptor.SingleSignOnInterceptor;
 import com.ldapauth.configuration.ApplicationConfig;
+import com.ldapauth.openapi.rest.interceptor.RestApiPermissionAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -38,6 +39,8 @@ public class LdapAuthMgtMvcConfig implements WebMvcConfigurer {
     @Autowired
     HistorySignOnAppInterceptor historySignOnAppInterceptor;
 
+    @Autowired
+    RestApiPermissionAdapter restApiPermissionAdapter;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -152,6 +155,17 @@ public class LdapAuthMgtMvcConfig implements WebMvcConfigurer {
                 //OAuth
                 .addPathPatterns("/auth/oauth/v20/authorize")
         ;
+
+        /*
+         * openapi
+         * idm
+         * users
+         * Organization
+         * */
+        registry.addInterceptor(restApiPermissionAdapter)
+                .addPathPatterns("/openapi/idm/**")
+        ;
+
         log.debug("add history SignOn App Interceptor");
 
     }

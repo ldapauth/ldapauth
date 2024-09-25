@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
 import com.ldapauth.exception.BusinessException;
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class AuthorizeEndpoint extends AuthorizeBaseEndpoint{
 	@GetMapping("/auth/{id}")
 	public ModelAndView authorize(@Validated @NotNull(message = "ID不能为空") @PathVariable("id") String id){
 		ModelAndView modelAndView = null;
-		Apps app=getApp(Long.valueOf(id));
+		ClientApps app=getApp(Long.valueOf(id));
 		WebContext.setAttribute(WebConstants.SINGLE_SIGN_ON_APP_ID, app.getId());
 		//0=oidc 1=saml 2=jwt 3=cas
 		switch (app.getProtocol().intValue()) {
@@ -60,7 +60,7 @@ public class AuthorizeEndpoint extends AuthorizeBaseEndpoint{
 	@GetMapping("/auth/refused")
 	public ModelAndView refused(){
 		ModelAndView modelAndView = new ModelAndView("authorize/authorize_refused");
-		Apps app = (Apps)WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
+		ClientApps app = (ClientApps)WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
 		modelAndView.addObject("model", app);
 		return modelAndView;
 	}

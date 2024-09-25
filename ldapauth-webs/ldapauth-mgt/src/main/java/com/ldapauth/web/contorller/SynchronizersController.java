@@ -1,10 +1,13 @@
 package com.ldapauth.web.contorller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
 import com.ldapauth.authn.web.AuthorizationUtils;
+import com.ldapauth.persistence.service.FileUploadService;
 import com.ldapauth.persistence.service.SynchronizersService;
 import com.ldapauth.pojo.dto.ChangeStatusDTO;
 import com.ldapauth.pojo.dto.SynchronizersDTO;
+import com.ldapauth.pojo.entity.FileUpload;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.pojo.vo.Result;
@@ -19,6 +22,15 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Objects;
 
@@ -37,6 +49,19 @@ public class SynchronizersController {
 
 	@Autowired
 	private SynchronizersService synchronizersService;
+
+	@Autowired
+	private FileUploadService fileUploadService;
+
+
+	/**
+	 * 定义证书路径
+	 */
+	final static String JKS_FILE = "/app/ldapauth/trustStore";
+	/**
+	 * 定义默认密码
+	 */
+	final static String JKS_FILE_PASSWORD = "changeit";
 
 	@Operation(summary = "ID查询", description = "返回结果", security = {@SecurityRequirement(name = "Authorization")})
 	@ApiResponse(responseCode = "200", description = "成功")
@@ -57,10 +82,16 @@ public class SynchronizersController {
 	public Result<String> edit(@Validated(value = EditGroup.class)  @RequestBody SynchronizersDTO synchronizersDTO) {
 		log.debug("-edit:{}",synchronizersDTO);
 		UserInfo currentUser = AuthorizationUtils.getUserInfo();
-		Synchronizers synchronizers = BeanUtil.copyProperties(synchronizersDTO,Synchronizers.class);
-		synchronizers.setUpdateBy(currentUser.getId());
-		synchronizers.setUpdateTime(new Date());
-		if (synchronizersService.updateById(synchronizers)) {
+		Synchronizers synchronizer = BeanUtil.copyProperties(synchronizersDTO,Synchronizers.class);
+		//判断是否开启ssl
+		if (Objects.nonNull(synchronizersDTO.isOpenssl()) && synchronizer.getOpenssl().booleanValue()) {
+			//返回路径
+			synchronizer.setTrustStore(JKS_FILE);
+			synchronizer.setTrustStorePassword(JKS_FILE_PASSWORD);
+		}
+		synchronizer.setUpdateBy(currentUser.getId());
+		synchronizer.setUpdateTime(new Date());
+		if (synchronizersService.updateById(synchronizer)) {
 			return Result.success("修改成功");
 		}
 		return Result.failed("修改失败");
@@ -73,6 +104,8 @@ public class SynchronizersController {
 	public Result<String> test(@Validated(value = EditGroup.class)  @RequestBody SynchronizersDTO synchronizersDTO) {
 		log.debug("-test:{}",synchronizersDTO);
 		Synchronizers synchronizers = BeanUtil.copyProperties(synchronizersDTO,Synchronizers.class);
+		synchronizers.setTrustStorePassword(JKS_FILE_PASSWORD);
+		synchronizers.setTrustStore(JKS_FILE);
 		if (synchronizersService.test(synchronizers)) {
 			return Result.success("测试成功");
 		}

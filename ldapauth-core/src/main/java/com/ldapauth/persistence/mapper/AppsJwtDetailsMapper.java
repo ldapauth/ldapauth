@@ -1,7 +1,7 @@
 package com.ldapauth.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ldapauth.pojo.entity.apps.details.AppsJwtDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  * Date:2024-07-11
  */
 @Mapper
-public interface AppsJwtDetailsMapper extends BaseMapper<AppsJwtDetails> {
+public interface AppsJwtDetailsMapper extends BaseMapper<ClientAppsJWTDetails> {
 }

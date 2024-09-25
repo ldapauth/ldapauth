@@ -6,6 +6,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -29,6 +30,8 @@ public class LdapUtils {
     protected DirContext ctx;
     protected String baseDN;
     protected String providerUrl;
+
+    protected String domain;
     protected String principal;
     protected String credentials;
     protected String referral = "ignore";
@@ -87,7 +90,7 @@ public class LdapUtils {
             log.info("connect to ldap " + providerUrl + " seccessful.");
         } catch (NamingException e) {
             log.error("connect to ldap " + providerUrl + " fail.");
-            log.error(e.getMessage());
+            log.error("error",e);
         }
         return ctx;
     }
@@ -313,10 +316,30 @@ public class LdapUtils {
 
     public static String getAttributeStringValue(String attribute ,HashMap<String,Attribute> attributeMap) throws NamingException {
 		attribute= attribute.toLowerCase();
-		if(null != attributeMap.get(attribute)  && null != attributeMap.get(attribute).get()) {
+        //AD的objectGUID
+        if("objectGUID".equalsIgnoreCase(attribute)) {
+            try {
+                Object oo=  attributeMap.get(attribute).get();
+                byte[] GUID = AdObjectGUIDReader.objectToByteArray(oo);
+                if (Objects.nonNull(GUID)) {
+                   return  AdObjectGUIDReader.convertBytesToUUID(GUID);
+                }
+            }catch (NamingException e){
+                log.error("error");
+            }
+        }
+        if(null != attributeMap.get(attribute)  && null != attributeMap.get(attribute).get()) {
 			return attributeMap.get(attribute).get().toString();
 		}else {
 			return "";
 		}
 	}
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
 }

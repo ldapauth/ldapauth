@@ -39,6 +39,9 @@
         <el-form-item prop="sortIndex" :label="t('org.sort')">
           <el-input-number v-model="form.sortIndex" :min="0" :max="999" style="width: 30%"/>
         </el-form-item>
+        <el-form-item label="DN">
+          <el-input v-model="form.ldapDn" type="textarea" disabled="true" maxlength="200"  show-word-limit></el-input>
+        </el-form-item>
       </el-form>
     </template>
     <template #footer>

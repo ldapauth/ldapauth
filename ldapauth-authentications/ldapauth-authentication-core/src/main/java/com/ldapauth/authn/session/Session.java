@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
-import com.ldapauth.pojo.entity.apps.Apps;
+import com.ldapauth.pojo.entity.apps.ClientApps;
 import com.ldapauth.web.WebContext;
 import org.springframework.security.core.Authentication;
 
@@ -61,7 +61,7 @@ public class Session implements Serializable{
      */
     Authentication authentication;
 
-    HashMap<Long , Apps> authorizedApps = new HashMap<Long , Apps>();
+    HashMap<Long , ClientApps> authorizedApps = new HashMap<Long , ClientApps>();
 
     public class STYLE {
     	public static final String WEB  = "web";
@@ -143,15 +143,15 @@ public class Session implements Serializable{
         this.authentication = authentication;
     }
 
-    public HashMap<Long, Apps> getAuthorizedApps() {
+    public HashMap<Long, ClientApps> getAuthorizedApps() {
         return authorizedApps;
     }
 
-    public void setAuthorizedApps(HashMap<Long, Apps> authorizedApps) {
+    public void setAuthorizedApps(HashMap<Long, ClientApps> authorizedApps) {
         this.authorizedApps = authorizedApps;
     }
 
-    public void setAuthorizedApp(Apps authorizedApp) {
+    public void setAuthorizedApp(ClientApps authorizedApp) {
         this.authorizedApps.put(authorizedApp.getId(), authorizedApp);
     }
 

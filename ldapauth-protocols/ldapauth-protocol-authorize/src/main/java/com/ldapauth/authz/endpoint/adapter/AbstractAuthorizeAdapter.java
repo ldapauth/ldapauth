@@ -2,7 +2,6 @@ package com.ldapauth.authz.endpoint.adapter;
 
 import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.AppsCasDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.servlet.ModelAndView;
 

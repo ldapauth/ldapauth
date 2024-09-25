@@ -2,7 +2,7 @@ package com.ldapauth.authz.oauth2.provider.code;
 
 import com.ldapauth.authz.oauth2.provider.OAuth2Authentication;
 import com.ldapauth.cache.CacheService;
-import com.ldapauth.pojo.entity.apps.details.AppsOidcDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsOIDCDetails;
 import com.ldapauth.util.ObjectTransformer;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,9 +22,9 @@ public class PgAuthorizationCodeServices extends RandomValueAuthorizationCodeSer
 
 	protected int codeValiditySeconds = 60 * 10; //default 10 minutes.
 
-	AppsOidcDetails details = null;
+	ClientAppsOIDCDetails details = null;
 
-	public void setDetails(AppsOidcDetails details) {
+	public void setDetails(ClientAppsOIDCDetails details) {
 		this.details = details;
 	}
 

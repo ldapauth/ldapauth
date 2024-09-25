@@ -10,10 +10,10 @@ import com.ldapauth.authz.saml20.binding.ExtractBindingAdapter;
 import com.ldapauth.crypto.keystore.KeyStoreLoader;
 import com.ldapauth.crypto.keystore.KeyStoreUtil;
 import com.ldapauth.exception.BusinessException;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.AppsDetails;
-import com.ldapauth.pojo.entity.apps.Apps;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
@@ -61,7 +61,7 @@ public class IdpInitEndpoint {
 	private KeyStoreLoader keyStoreLoader;
 
 	@Autowired
-	private AppsService appsService;
+	private ClientAppsService appsService;
 
 	/**
 	 *
@@ -82,11 +82,11 @@ public class IdpInitEndpoint {
 
 		Result<AppsDetails> details = appsService.getDetails(Long.valueOf(appId));
 		Result<AppsDetails> result = details;
-		AppsSamlDetails saml20Details =null;
-		Apps apps =null;
+		ClientAppsSAMLDetails saml20Details =null;
+		ClientApps apps =null;
 		if (result.isSuccess()) {
 			AppsDetails d = result.getData();
-			saml20Details = (AppsSamlDetails) d.getDetails();
+			saml20Details = (ClientAppsSAMLDetails) d.getDetails();
 			apps = d.getApp();
 		}
 		if (saml20Details == null) {

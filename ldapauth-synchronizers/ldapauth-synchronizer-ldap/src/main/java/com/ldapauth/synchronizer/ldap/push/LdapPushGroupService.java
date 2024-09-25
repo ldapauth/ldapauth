@@ -7,8 +7,8 @@ import com.ldapauth.persistence.service.GroupService;
 import com.ldapauth.pojo.entity.Group;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.provision.abstracts.AbstractBaseHandle;
-import com.ldapauth.provision.interfaces.BaseHandle;
+import com.ldapauth.synchronizer.abstracts.AbstractPushSynchronizer;
+import com.ldapauth.synchronizer.ISynchronizerPushService;
 import com.ldapauth.synchronizer.ldap.utils.FormatUtil;
 import com.ldapauth.util.LdapUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class LdapPushGroupService extends AbstractBaseHandle implements BaseHandle {
+public class LdapPushGroupService extends AbstractPushSynchronizer implements ISynchronizerPushService {
 
     @Autowired
     GroupService groupService;

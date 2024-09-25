@@ -9,9 +9,6 @@
 	<artifactId>ldapauth-webs</artifactId>
 	<packaging>pom</packaging>
 	<modules>
-	<!--	<module>ldapauth-web</module>-->
 		<module>ldapauth-mgt</module>
-	<!--	<module>ldapauth-openapi</module>-->
 	</modules>
-	<dependencies></dependencies>
 </project>

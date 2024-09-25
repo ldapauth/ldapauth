@@ -21,6 +21,8 @@ public class ProvisionService {
     @Autowired
     SynchronizersService synchronizersService;
 
+    @Autowired
+    LdapSyncThread ldapSyncThread;
     /**
      * send  msg
      * @param topic  TOPIC
@@ -41,14 +43,11 @@ public class ProvisionService {
             push(synchronizersService, topic, message);
         }
     }
-    /**
-     * 定义200个线程池
-     */
+
 
     private void push(SynchronizersService synchronizersService,
                      String topic, ProvisionMessage provisionMessage){
-        LdapSyncThread restSyncThread =  new LdapSyncThread(synchronizersService,topic,provisionMessage);
-        restSyncThread.run();
+        ldapSyncThread.run(synchronizersService,topic,provisionMessage);
     }
 
 

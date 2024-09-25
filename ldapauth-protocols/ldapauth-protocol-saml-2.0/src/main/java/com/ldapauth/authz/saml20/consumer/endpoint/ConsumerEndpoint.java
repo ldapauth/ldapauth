@@ -16,9 +16,9 @@ import com.ldapauth.authn.jwt.AuthTokenService;
 import com.ldapauth.authn.provider.AbstractAuthenticationProvider;
 import com.ldapauth.constants.ConstsLoginType;
 import com.ldapauth.crypto.keystore.KeyStoreLoader;
-import com.ldapauth.persistence.service.AppsService;
+import com.ldapauth.persistence.service.ClientAppsService;
 import com.ldapauth.pojo.dto.AppsDetails;
-import com.ldapauth.pojo.entity.apps.details.AppsSamlDetails;
+import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
 import com.ldapauth.pojo.vo.Result;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -92,7 +92,7 @@ public class ConsumerEndpoint {
 	private ExtractBindingAdapter extractBindingAdapter;
 
 	@Autowired
-	private AppsService appsService;
+	private ClientAppsService appsService;
 
 	@Autowired
 	@Qualifier("issueInstantRule")
@@ -217,10 +217,10 @@ public class ConsumerEndpoint {
 	private void initCredential(String appId) throws Exception {
 		// 1. 获取 sp keyStore
 		Result<AppsDetails> result = appsService.getDetails(Long.valueOf(appId));
-		AppsSamlDetails saml20Details =null;
+		ClientAppsSAMLDetails saml20Details =null;
 		if (result.isSuccess()) {
 			AppsDetails d = result.getData();
-			saml20Details = (AppsSamlDetails) d.getDetails();
+			saml20Details = (ClientAppsSAMLDetails) d.getDetails();
 		}
 
 		if (saml20Details == null) {
