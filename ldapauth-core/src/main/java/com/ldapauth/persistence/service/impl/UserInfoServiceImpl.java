@@ -202,7 +202,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
             entity.setPasswordLastSetTime(new Date());
         }
         boolean flag = super.save(entity);
-        if (flag) {
+        if (flag && entity.isSync()) {
             provisionService.send(
                     ProvisionTopic.USERINFO_TOPIC,
                     entity,
@@ -258,7 +258,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         checkEmailDuplicateWhenEdit(email, id);
 
         boolean flag = super.updateById(entity);
-        if (flag) {
+        if (flag && entity.isSync()) {
             provisionService.send(
                     ProvisionTopic.USERINFO_TOPIC,
                     entity,
@@ -626,7 +626,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         wrapper.set(UserInfo::getPasswordLastSetTime,new Date());
         boolean resetPwdResult = super.update(wrapper);
         if (resetPwdResult) {
-           UserInfo userInfo = super.getById(id);
+            UserInfo userInfo = super.getById(id);
             provisionService.send(
                     ProvisionTopic.USERINFO_TOPIC,
                     userInfo,

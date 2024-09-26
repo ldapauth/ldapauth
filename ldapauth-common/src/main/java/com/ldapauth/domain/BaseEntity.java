@@ -55,5 +55,9 @@ public class BaseEntity implements Serializable {
     @Schema(name = "updateTime",description = "更新时间")
     Date updateTime;
 
+    @TableField(exist = false)
+    @Schema(name = "sync",description = "是否同步-默认否")
+    boolean sync = false;
+
 
 }

@@ -73,6 +73,7 @@ public class RestOrganizationsController {
 		Organization organization = BeanUtil.copyProperties(dto,Organization.class);
 		organization.setCreateBy(0L);
 		organization.setCreateTime(new Date());
+		organization.setSync(true);
 		return organizationService.saveOrg(organization);
 	}
 
@@ -84,6 +85,7 @@ public class RestOrganizationsController {
 		Organization organization = BeanUtil.copyProperties(dto,Organization.class);
 		organization.setUpdateBy(0L);
 		organization.setUpdateTime(new Date());
+		organization.setSync(true);
 		return organizationService.editOrg(organization);
 	}
 

@@ -134,7 +134,7 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
         }
         boolean save = super.save(organization);
 
-        if (save) {
+        if (save && organization.isSync()) {
             provisionService.send(
                     ProvisionTopic.ORG_TOPIC,
                     organization,
@@ -191,7 +191,7 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
             result = super.updateBatchById(updatedOrgInfos);
             if(result &&
                     (organization.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY) ||
-                    organization.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP))
+                            organization.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP))
             ){
                 Synchronizers synchronizers = synchronizersService.LdapConfig();
                 for (Organization chin : updatedOrgInfos){
@@ -203,7 +203,7 @@ public class OrganizationServiceImpl extends ServiceImpl<OrganizationMapper, Org
             }
         }
 
-        if (result) {
+        if (result && organization.isSync()) {
             provisionService.send(
                     ProvisionTopic.ORG_TOPIC,
                     organization,

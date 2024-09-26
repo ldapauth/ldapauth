@@ -126,6 +126,7 @@ public class UsersController {
 		UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO,UserInfo.class);
 		userInfo.setCreateBy(currentUser.getId());
 		userInfo.setCreateTime(new Date());
+		userInfo.setSync(true);
 		if (userInfoService.save(userInfo)) {
 			return Result.success("新增成功");
 		}
@@ -141,6 +142,7 @@ public class UsersController {
 		UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO,UserInfo.class,"password");
 		userInfo.setUpdateBy(currentUser.getId());
 		userInfo.setUpdateTime(new Date());
+		userInfo.setSync(true);
 		if (userInfoService.updateById(userInfo)) {
 			return Result.success("修改成功");
 		}
@@ -220,7 +222,7 @@ public class UsersController {
 	}
 
 	@Operation(summary = "更新用户资料", description = "返回结果",
-	security = {@SecurityRequirement(name = "Authorization")}
+			security = {@SecurityRequirement(name = "Authorization")}
 	)
 	@ApiResponse(
 			responseCode = "200",

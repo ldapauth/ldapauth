@@ -3,7 +3,6 @@ package com.ldapauth.openapi.rest;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ldapauth.authn.realm.ldap.LdapAuthenticationRealm;
-import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.constants.ConstsSynchronizers;
 import com.ldapauth.persistence.service.OrganizationService;
 import com.ldapauth.persistence.service.UserInfoService;
@@ -76,6 +75,7 @@ public class RestUsersController {
 		UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO,UserInfo.class);
 		userInfo.setCreateBy(0L);
 		userInfo.setCreateTime(new Date());
+		userInfo.setSync(true);
 		if (userInfoService.save(userInfo)) {
 			return Result.success("新增成功");
 		}
@@ -90,6 +90,7 @@ public class RestUsersController {
 		UserInfo userInfo = BeanUtil.copyProperties(userInfoDTO,UserInfo.class,"password");
 		userInfo.setUpdateBy(0L);
 		userInfo.setUpdateTime(new Date());
+		userInfo.setSync(true);
 		if (userInfoService.updateById(userInfo)) {
 			return Result.success("修改成功");
 		}

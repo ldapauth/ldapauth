@@ -125,7 +125,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
             }
         }
         boolean flag =  super.save(entity);
-        if (flag) {
+        if (flag && entity.isSync()) {
             provisionService.send(
                     ProvisionTopic.GROUP_TOPIC,
                     entity,
@@ -166,7 +166,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
     @Override
     public boolean updateById(Group entity) {
         boolean flag =  super.updateById(entity);
-        if (flag) {
+        if (flag && entity.isSync()) {
             provisionService.send(
                     ProvisionTopic.GROUP_TOPIC,
                     entity,

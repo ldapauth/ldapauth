@@ -83,6 +83,7 @@ public class OrganizationsController {
 		Organization organization = BeanUtil.copyProperties(dto,Organization.class);
 		organization.setCreateBy(currentUser.getId());
 		organization.setCreateTime(new Date());
+		organization.setSync(true);
 		return organizationService.saveOrg(organization);
 	}
 
@@ -95,6 +96,7 @@ public class OrganizationsController {
 		Organization organization = BeanUtil.copyProperties(dto,Organization.class);
 		organization.setUpdateBy(currentUser.getId());
 		organization.setUpdateTime(new Date());
+		organization.setSync(true);
 		return organizationService.editOrg(organization);
 	}
 

@@ -85,6 +85,7 @@ public class GroupsController {
 		Group group = BeanUtil.copyProperties(groupDTO,Group.class);
 		group.setCreateBy(currentUser.getId());
 		group.setCreateTime(new Date());
+		group.setSync(true);
 		if (groupService.save(group)) {
 			return Result.success("新增成功");
 		}
@@ -101,6 +102,7 @@ public class GroupsController {
 		Group group = BeanUtil.copyProperties(groupDTO,Group.class);
 		group.setUpdateBy(currentUser.getId());
 		group.setUpdateTime(new Date());
+		group.setSync(true);
 		if (groupService.updateById(group)) {
 			return Result.success("修改成功");
 		}
@@ -130,8 +132,8 @@ public class GroupsController {
 	@PutMapping(value = { "/updateStatus" }, produces = {MediaType.APPLICATION_JSON_VALUE})
 	@ResponseBody
 	public Result<String> updateStatus(@Validated(value = EditGroup.class)
-										   @RequestBody ChangeStatusDTO changeStatusDTO
-										  ) {
+									   @RequestBody ChangeStatusDTO changeStatusDTO
+	) {
 		UserInfo currentUser = AuthorizationUtils.getUserInfo();
 		log.debug("-updateStatus:{}",changeStatusDTO);
 		if (groupService.updateStatus(changeStatusDTO,currentUser.getId(),new Date())) {
