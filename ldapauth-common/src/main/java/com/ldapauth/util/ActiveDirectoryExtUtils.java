@@ -90,6 +90,8 @@ public class ActiveDirectoryExtUtils extends LdapUtils {
  	        _logger.debug("Active Directory SECURITY_PRINCIPAL : " + activeDirectoryPrincipal);
  	        props.setProperty(Context.SECURITY_PRINCIPAL, activeDirectoryPrincipal);
  	        props.setProperty(Context.SECURITY_CREDENTIALS, credentials);
+             //	**解决 乱码 的关键一句
+             props.put("java.naming.ldap.attributes.binary","objectGUID");
 
  	        if (ssl && providerUrl.toLowerCase().startsWith("ldaps")) {
  	        	_logger.info("ldaps security protocol.");

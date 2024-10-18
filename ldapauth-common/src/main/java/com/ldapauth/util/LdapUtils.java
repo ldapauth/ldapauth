@@ -22,9 +22,9 @@ public class LdapUtils {
     public static final  String propertyTrustStorePassword = "trustStorePassword";
 
     public class Product{
-    	public static final  String ActiveDirectory		= "ActiveDirectory";
-    	public static final  String OpenLDAP			= "OpenLDAP";
-    	public static final  String StandardLDAP		= "StandardLDAP";
+        public static final  String ActiveDirectory		= "ActiveDirectory";
+        public static final  String OpenLDAP			= "OpenLDAP";
+        public static final  String StandardLDAP		= "StandardLDAP";
     }
 
     protected DirContext ctx;
@@ -77,16 +77,16 @@ public class LdapUtils {
     }
 
     protected DirContext InitialDirContext(Properties properties) {
-    	if(ctx == null) {
-    		ctx =createDirContext(properties);
-    	}
+        if(ctx == null) {
+            ctx =createDirContext(properties);
+        }
         return ctx;
     }
 
     protected DirContext createDirContext(Properties properties) {
-    	DirContext ctx = null;
+        DirContext ctx = null;
         try {
-        	ctx = new InitialDirContext(properties);
+            ctx = new InitialDirContext(properties);
             log.info("connect to ldap " + providerUrl + " seccessful.");
         } catch (NamingException e) {
             log.error("connect to ldap " + providerUrl + " fail.");
@@ -96,40 +96,43 @@ public class LdapUtils {
     }
 
     protected void initEnvironment() {
-    	// LDAP
+        // LDAP
         if(props == null) {
             log.debug("PROVIDER_URL {}" , providerUrl);
             log.debug("SECURITY_PRINCIPAL {}" , principal);
-             //no log credentials
-             //_logger.trace("SECURITY_CREDENTIALS {}" , credentials);
-	        props = new Properties();
-	        props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-	        props.setProperty(Context.URL_PKG_PREFIXES, "com.sun.jndi.url");
-	        props.setProperty(Context.REFERRAL, referral);
-	        props.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
+            //no log credentials
+            //_logger.trace("SECURITY_CREDENTIALS {}" , credentials);
+            props = new Properties();
+            props.setProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            props.setProperty(Context.URL_PKG_PREFIXES, "com.sun.jndi.url");
+            props.setProperty(Context.REFERRAL, referral);
+            props.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
 
-	        props.setProperty(Context.PROVIDER_URL, providerUrl);
-	        props.setProperty(Context.SECURITY_PRINCIPAL, principal);
-	        props.setProperty(Context.SECURITY_CREDENTIALS, credentials);
+            props.setProperty(Context.PROVIDER_URL, providerUrl);
+            props.setProperty(Context.SECURITY_PRINCIPAL, principal);
+            props.setProperty(Context.SECURITY_CREDENTIALS, credentials);
+            //	**解决 乱码 的关键一句
+            props.put("java.naming.ldap.attributes.binary","objectGUID");
 
-	        if (ssl && providerUrl.toLowerCase().startsWith("ldaps")) {
-	            System.setProperty("javax.net.ssl.trustStore", trustStore);
-	            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-	            props.put(Context.SECURITY_PROTOCOL, "ssl");
-	            props.put(Context.REFERRAL, "follow");
-	        }
+            if (ssl && providerUrl.toLowerCase().startsWith("ldaps")) {
+                System.setProperty("javax.net.ssl.trustStore", trustStore);
+                System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                props.put(Context.SECURITY_PROTOCOL, "ssl");
+                props.put(Context.REFERRAL, "follow");
+
+            }
         }
     }
 
     // connect to ldap server
     public DirContext openConnection() {
-    	initEnvironment();
+        initEnvironment();
         return InitialDirContext(props);
     }
 
- // connect to ldap server
+    // connect to ldap server
     public DirContext createConnection() {
-    	initEnvironment();
+        initEnvironment();
         return createDirContext(props);
     }
 
@@ -277,15 +280,15 @@ public class LdapUtils {
     }
 
     public static String getAttrStringValue(Attributes attrs, String elem) {
-    	StringBuffer  values = new StringBuffer("");
+        StringBuffer  values = new StringBuffer("");
         try {
             if (attrs.get(elem) != null) {
                 for (int i = 0; i < attrs.get(elem).size(); i++) {
-                	if(i == 0) {
-                		values.append(attrs.get(elem).get(i).toString());
-                	}else {
-                		values.append(" , ").append(attrs.get(elem).get(i).toString());
-                	}
+                    if(i == 0) {
+                        values.append(attrs.get(elem).get(i).toString());
+                    }else {
+                        values.append(" , ").append(attrs.get(elem).get(i).toString());
+                    }
                 }
             }
         } catch (NamingException e) {
@@ -296,15 +299,15 @@ public class LdapUtils {
     }
 
     public static String getAttrStringValue(Attribute attr) {
-    	StringBuffer  values = new StringBuffer("");
+        StringBuffer  values = new StringBuffer("");
         try {
             if (attr != null) {
                 for (int i = 0; i < attr.size(); i++) {
-                	if(i == 0) {
-                		values.append(attr.get(i).toString());
-                	}else {
-                		values.append(" , ").append(attr.get(i).toString());
-                	}
+                    if(i == 0) {
+                        values.append(attr.get(i).toString());
+                    }else {
+                        values.append(" , ").append(attr.get(i).toString());
+                    }
                 }
             }
         } catch (NamingException e) {
@@ -315,25 +318,52 @@ public class LdapUtils {
     }
 
     public static String getAttributeStringValue(String attribute ,HashMap<String,Attribute> attributeMap) throws NamingException {
-		attribute= attribute.toLowerCase();
+        attribute= attribute.toLowerCase();
         //AD的objectGUID
         if("objectGUID".equalsIgnoreCase(attribute)) {
             try {
-                Object oo=  attributeMap.get(attribute).get();
-                byte[] GUID = AdObjectGUIDReader.objectToByteArray(oo);
+                byte[] GUID = (byte[])attributeMap.get(attribute).get();
                 if (Objects.nonNull(GUID)) {
-                   return  AdObjectGUIDReader.convertBytesToUUID(GUID);
+                    String strGUID = "";
+                    strGUID = "{";
+                    strGUID = strGUID + AddLeadingZero((int)GUID[3] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[2] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[1] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[0] & 0xFF);
+                    strGUID = strGUID + "-";
+                    strGUID = strGUID + AddLeadingZero((int)GUID[5] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[4] & 0xFF);
+                    strGUID = strGUID + "-";
+                    strGUID = strGUID + AddLeadingZero((int)GUID[7] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[6] & 0xFF);
+                    strGUID = strGUID + "-";
+                    strGUID = strGUID + AddLeadingZero((int)GUID[8] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[9] & 0xFF);
+                    strGUID = strGUID + "-";
+                    strGUID = strGUID + AddLeadingZero((int)GUID[10] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[11] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[12] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[13] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[14] & 0xFF);
+                    strGUID = strGUID + AddLeadingZero((int)GUID[15] & 0xFF);
+                    strGUID = strGUID + "}";
+                    return strGUID;
                 }
             }catch (NamingException e){
                 log.error("error");
             }
         }
         if(null != attributeMap.get(attribute)  && null != attributeMap.get(attribute).get()) {
-			return attributeMap.get(attribute).get().toString();
-		}else {
-			return "";
-		}
-	}
+            return attributeMap.get(attribute).get().toString();
+        }else {
+            return "";
+        }
+    }
+
+    public static String AddLeadingZero(int k) {
+        return (k <= 0xF) ? "0" + Integer.toHexString(k) : Integer
+                .toHexString(k);
+    }
 
     public String getDomain() {
         return domain;
