@@ -77,8 +77,9 @@ public class JdbcAuthenticationRealm extends AbstractAuthenticationRealm {
      */
     public boolean passwordMatches(UserInfo userInfo, String password) {
         boolean passwordMatches = false;
-		//判断来源如果不是本地则进行LDAP验证
-       if (!userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.SYSTEM)) {
+		//判断来源LDAP
+       if (userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.OPEN_LDAP) &&
+			   userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.ACTIVEDIRECTORY)) {
 	        try {
 				passwordMatches = ldapAuthenticationRealm.passwordMatches(userInfo, password);
 				if (passwordMatches) {
@@ -89,7 +90,11 @@ public class JdbcAuthenticationRealm extends AbstractAuthenticationRealm {
 	        }
         }
 	    //本地认证
-	    else if(userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.SYSTEM)) {
+	    else if(userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.SYSTEM) ||
+			   userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.FEISHU) ||
+			   userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.WORKWEIXIN) ||
+			   userInfo.getObjectFrom().equalsIgnoreCase(ConstsSynchronizers.DINGDING)
+	   ) {
 		   passwordMatches = passwordEncoder.matches(password,userInfo.getPassword());
 	    }
         _logger.debug("passwordvalid : {}" , passwordMatches);

@@ -2,7 +2,7 @@ package com.ldapauth.authz.saml20.provider.xml;
 
 
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
+import com.ldapauth.pojo.entity.client.details.ClientSAMLDetails;
 import com.ldapauth.web.WebContext;
 import org.apache.commons.lang3.StringUtils;
 import com.ldapauth.authz.saml.service.TimeService;
@@ -26,7 +26,7 @@ public class SubjectGenerator {
 		this.timeService = timeService;
 	}
 
-	public Subject generateSubject( ClientAppsSAMLDetails saml20Details,
+	public Subject generateSubject( ClientSAMLDetails saml20Details,
 							String assertionConsumerURL,
 							String inResponseTo,
 							int validInSeconds,

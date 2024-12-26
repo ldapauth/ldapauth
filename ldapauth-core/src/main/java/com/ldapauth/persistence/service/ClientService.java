@@ -2,23 +2,23 @@ package com.ldapauth.persistence.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ldapauth.pojo.dto.*;
-import com.ldapauth.pojo.entity.apps.ClientApps;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsOIDCDetails;
+import com.ldapauth.pojo.entity.client.Client;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientJWTDetails;
+import com.ldapauth.pojo.entity.client.details.ClientOIDCDetails;
 import com.ldapauth.pojo.vo.Result;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public interface ClientAppsService extends IService<ClientApps> {
+public interface ClientService extends IService<Client> {
 
 
     /**
      * 获取用户授权的应用列表
      * @param userId
      */
-    List<ClientApps> myApps(Long userId);
+    List<Client> myClient(Long userId);
 
     Result<String> oidcCreate(AppsOidcDTO dto);
     Result<String> oidcUpdate(AppsOidcDTO dto);
@@ -39,7 +39,7 @@ public interface ClientAppsService extends IService<ClientApps> {
      * @param clientId
      * @return
      */
-    AppsDetails<ClientAppsOIDCDetails> getDetailsClientId(String clientId);
+    AppsDetails<ClientOIDCDetails> getDetailsClientId(String clientId);
 
     int updateStatus(ArrayList<Long> ids, int i);
 
@@ -51,13 +51,13 @@ public interface ClientAppsService extends IService<ClientApps> {
      * @param isMach
      * @return
      */
-    ClientAppsCASDetails getAppDetails(String service, boolean isMach);
+    ClientCASDetails getAppDetails(String service, boolean isMach);
 
     /**
      * 根据appId获取jwt对象
      * @return
      */
-    ClientAppsJWTDetails getAppsJwtDetails(Long appId);
+    ClientJWTDetails getAppsJwtDetails(Long appId);
 
     /**
      * 基于client查询应用
@@ -65,6 +65,6 @@ public interface ClientAppsService extends IService<ClientApps> {
      * @param isMach
      * @return
      */
-    ClientApps getByClientId(String clientId, boolean isMach);
+    Client getByClientId(String clientId, boolean isMach);
 
 }

@@ -14,7 +14,7 @@ import com.ldapauth.authz.cas.endpoint.ticket.ServiceTicketImpl;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.exception.BusinessException;
 import com.ldapauth.pojo.dto.AppsDetails;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import com.ldapauth.pojo.vo.Result;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
@@ -58,7 +58,7 @@ public class CasAuthorizeEndpoint  extends CasBaseAuthorizeEndpoint{
 								 HttpServletRequest request,
 								 HttpServletResponse response
 			){
-		ClientAppsCASDetails casDetails = appsService.getAppDetails(casService , true);
+		ClientCASDetails casDetails = appsService.getAppDetails(casService , true);
 		if (Objects.nonNull(casDetails)) {
 			Result<AppsDetails> casDetails3 = appsService.getDetails(casDetails.getAppId());
 			if (casDetails3.isSuccess()) {
@@ -83,7 +83,7 @@ public class CasAuthorizeEndpoint  extends CasBaseAuthorizeEndpoint{
 				throw new BusinessException(HttpStatus.BAD_REQUEST.value(), "应用["+id+"]被禁用");
 			}
 			AppsDetails details = casDetails.getData();
-			ClientAppsCASDetails appsCasDetails = (ClientAppsCASDetails) details.getDetails();
+			ClientCASDetails appsCasDetails = (ClientCASDetails) details.getDetails();
 			return buildCasModelAndView(request, response, details, casDetails == null ? id : appsCasDetails.getServerNames());
 		}
 		throw new BusinessException(HttpStatus.BAD_REQUEST.value(), "发起失败,无法查找应用标识");
@@ -113,7 +113,7 @@ public class CasAuthorizeEndpoint  extends CasBaseAuthorizeEndpoint{
 		    }
 		    _logger.debug("CAS service with Parameter : {}" , parameterMap);
 		}
-		ClientAppsCASDetails appsCasDetails = (ClientAppsCASDetails) casDetails.getDetails();
+		ClientCASDetails appsCasDetails = (ClientCASDetails) casDetails.getDetails();
 		appsCasDetails.setServerNames(casService);
 		String tempCode = identifierGenerator.nextUUID(CAS_SSO_CODE);
 		//缓存1分钟
@@ -131,7 +131,7 @@ public class CasAuthorizeEndpoint  extends CasBaseAuthorizeEndpoint{
 		ModelAndView modelAndView = new ModelAndView("authorize/cas_sso_submint");
 		String code = WebContext.getParameter("code");
 		String tempCode = CAS_SSO_CODE + code;
-		ClientAppsCASDetails appsCasDetails = cacheService.getCacheObject(tempCode);
+		ClientCASDetails appsCasDetails = cacheService.getCacheObject(tempCode);
 		if (Objects.isNull(appsCasDetails)) {
 			throw new BusinessException(HttpStatus.BAD_REQUEST.value(),"无法识别临时码["+code+"]");
 		}

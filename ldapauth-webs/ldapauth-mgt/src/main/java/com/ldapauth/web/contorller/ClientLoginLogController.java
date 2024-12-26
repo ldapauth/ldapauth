@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.authn.web.AuthorizationUtils;
-import com.ldapauth.persistence.service.AppLoginLogService;
+import com.ldapauth.persistence.service.ClientLoginLogService;
 import com.ldapauth.pojo.dto.AppLoginLogQueryDTO;
-import com.ldapauth.pojo.entity.apps.ClientAppsLoginLog;
+import com.ldapauth.pojo.entity.client.ClientLoginLog;
 import com.ldapauth.pojo.entity.UserInfo;
 import com.ldapauth.util.DateUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,9 +32,9 @@ import java.util.Date;
 @RestController
 @RequestMapping(value = "/audit/applogin")
 @Slf4j
-public class AppLoginLogController {
+public class ClientLoginLogController {
     @Autowired
-    private AppLoginLogService service;
+    private ClientLoginLogService service;
 
     @Operation(
             summary = "查询应用访问日志", description = "查询应用访问日志",
@@ -44,21 +44,21 @@ public class AppLoginLogController {
     public Page list(AppLoginLogQueryDTO model) {
         SignPrincipal signPrincipal = AuthorizationUtils.getPrincipal();
         UserInfo currentUser = signPrincipal.getUserInfo();
-        LambdaQueryWrapper<ClientAppsLoginLog> queryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<ClientLoginLog> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotEmpty(model.getDisplayName())) {
-            queryWrapper.like(ClientAppsLoginLog::getDisplayName,model.getDisplayName());
+            queryWrapper.like(ClientLoginLog::getDisplayName,model.getDisplayName());
         }
         if (StringUtils.isNotEmpty(model.getAppName())) {
-            queryWrapper.like(ClientAppsLoginLog::getAppName,model.getAppName());
+            queryWrapper.like(ClientLoginLog::getAppName,model.getAppName());
         }
         //如果是超级管理员，则设置全部查询，否则只能查询自己
         if (!signPrincipal.isRoleAdministrators()) {
-            queryWrapper.eq(ClientAppsLoginLog::getUserId,currentUser.getId());
+            queryWrapper.eq(ClientLoginLog::getUserId,currentUser.getId());
         }
         if (model.getStartDate() != null && model.getEndDate() != null) {
-            queryWrapper.between(ClientAppsLoginLog::getCreateTime, model.getStartDate(), model.getEndDate());
+            queryWrapper.between(ClientLoginLog::getCreateTime, model.getStartDate(), model.getEndDate());
         } else {
-            queryWrapper.between(ClientAppsLoginLog::getCreateTime,
+            queryWrapper.between(ClientLoginLog::getCreateTime,
                     DateUtils.format(new Date(new Date().getTime() - 1000 * 60 * 60 * 24), DateUtils.FORMAT_DATE_YYYY_MM_DD_HH_MM_SS),
                     DateUtils.format(new Date(), DateUtils.FORMAT_DATE_YYYY_MM_DD_HH_MM_SS));
         }

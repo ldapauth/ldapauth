@@ -4,6 +4,7 @@ import javax.servlet.ServletException;
 
 import cn.hutool.core.io.FileUtil;
 import com.ldapauth.util.SslUtils;
+import com.ldapauth.utils.SSLUtilities;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import com.ldapauth.configuration.ApplicationConfig;
@@ -52,6 +53,10 @@ public class LdapAuthMgtApplication extends SpringBootServletInitializer {
 							SpringApplication.run(LdapAuthMgtApplication.class, args);
 		InitializeContext initWebContext = new InitializeContext(applicationContext);
 		try {
+			// 绕过所有主机名的验证
+			SSLUtilities.trustAllHostnames();
+			// 绕过所有HTTPS证书的验证
+			SSLUtilities.trustAllHttpsCertificates();
 			initWebContext.init(null);
 		} catch (ServletException e) {
 			log.error("Exception ",e);

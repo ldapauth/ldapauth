@@ -1,7 +1,7 @@
 package com.ldapauth.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ldapauth.pojo.entity.apps.ClientAppsLoginLog;
+import com.ldapauth.pojo.entity.client.ClientLoginLog;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @Date: 2024/7/23  11:21
  */
 @Mapper
-public interface AppLoginLogMapper extends BaseMapper<ClientAppsLoginLog> {
+public interface ClientLoginLogMapper extends BaseMapper<ClientLoginLog> {
 }

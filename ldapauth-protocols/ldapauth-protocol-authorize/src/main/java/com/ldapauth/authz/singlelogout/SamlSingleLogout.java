@@ -20,7 +20,7 @@ package com.ldapauth.authz.singlelogout;
 import java.util.HashMap;
 import java.util.UUID;
 
-import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.client.Client;
 import com.ldapauth.util.DateUtils;
 import org.springframework.security.core.Authentication;
 
@@ -43,7 +43,7 @@ public class SamlSingleLogout extends SingleLogout{
             + "</saml:NameID><samlp:SessionIndex>%s</samlp:SessionIndex></samlp:LogoutRequest>";
 
     @Override
-    public void sendRequest(Authentication authentication, ClientApps logoutApp) {
+    public void sendRequest(Authentication authentication, Client logoutApp) {
         String requestMessage = String.format(logoutRequestMessage,
                 UUID.randomUUID().toString(),
                 DateUtils.getCurrentDateAsString(DateUtils.FORMAT_DATE_ISO_TIMESTAMP),

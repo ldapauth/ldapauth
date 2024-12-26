@@ -18,6 +18,7 @@ import com.lark.oapi.core.request.RequestOptions;
 import com.lark.oapi.service.contact.v3.model.*;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.constants.ConstsSynchronizers;
+import com.ldapauth.crypto.password.PasswordReciprocal;
 import com.ldapauth.exception.BusinessException;
 import com.ldapauth.persistence.service.OrganizationService;
 import com.ldapauth.persistence.service.PolicyPasswordService;
@@ -32,6 +33,7 @@ import com.taobao.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -53,6 +55,8 @@ public class DingtalkPullService extends AbstractSynchronizerService implements 
 
 	@Autowired
 	IdentifierGenerator identifierGenerator;
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	Long trackingUniqueId = 0L;
 
@@ -93,7 +97,7 @@ public class DingtalkPullService extends AbstractSynchronizerService implements 
 				deptList = recursionDeptAllSub(getRootID(),deptList);
 				ids = deptList.stream().map(OapiV2DepartmentListsubResponse.DeptBaseResponse::getDeptId).collect(Collectors.toList());
 				for (OapiV2DepartmentListsubResponse.DeptBaseResponse response : deptList) {
-					Organization organization = bulidOrgs(response);
+					Organization organization = buildOrgs(response);
 					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
 					if (Objects.nonNull(organization.getId()) && organization.getId().intValue() != 0) {
 						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
@@ -226,37 +230,103 @@ public class DingtalkPullService extends AbstractSynchronizerService implements 
 			}
 		}
 
-		for (OapiV2UserListResponse.ListUserResponse response : userList) {
-			UserInfo userInfo = bulidUser(response);
-			String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
-			if (Objects.nonNull(userInfo.getId()) && userInfo.getId().intValue() != 0) {
-				syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
-			}
-			boolean flag = false;
-			String message = "成功";
-			Integer success = ConstsSynchronizers.SyncResultStatus.SUCCESS;
-			try {
-				//入库存储
-				flag = userInfoService.saveOrUpdate(userInfo);
-			} catch (BusinessException e) {
-				flag = false;
-				message = e.getMessage();
-			}
-			if(!flag) {
-				success = ConstsSynchronizers.SyncResultStatus.FAIL;
-			}
-			//记录日志
-			super.historyLogs(
-					userInfo, trackingUniqueId,
-					ConstsSynchronizers.SyncType.USER,
-					syncActionType,
-					success,
-					message
-			);
-
+		if (CollectionUtil.isNotEmpty(userList)) {
+			Map<String,UserInfo> userMap = getUserMapByObjectFrom(ConstsSynchronizers.DINGDING);
+			//批处理用户
+			batchUser(userList,userMap);
 		}
 	}
 
+	/**
+	 * 批处理用户，批量更新或者新增
+	 * @param userList
+	 * @param userMap
+	 */
+	private void batchUser(List<OapiV2UserListResponse.ListUserResponse> userList,Map<String,UserInfo> userMap){
+		List<UserInfo> batchAdd = new ArrayList<>();
+		List<UserInfo> batchUpdate = new ArrayList<>();
+		//定义需要删除的用户集合,根据openid比对数据库记录
+		List<UserInfo> batchDelete = new ArrayList<>();
+		List<String> allOpenIds = new ArrayList<>();
+		String defPassword = ConstsSynchronizers.DEF_PASSWORD;
+		String password = passwordEncoder.encode(defPassword);
+		String decipherable = PasswordReciprocal.getInstance().encode(defPassword);
+
+		for (OapiV2UserListResponse.ListUserResponse user : userList) {
+			allOpenIds.add(user.getUnionid());
+			//判断用户是否存在
+			UserInfo oldUserInfo = userMap.get(user.getUnionid());
+			UserInfo userInfo = buildUser(user,oldUserInfo);
+			if (Objects.nonNull(oldUserInfo)) {
+				batchUpdate.add(userInfo);
+			} else {
+				userInfo.setPassword(password);
+				userInfo.setDecipherable(decipherable);
+				userInfo.setPasswordLastSetTime(new Date());
+				userInfo.setBadPasswordCount(0);
+				batchAdd.add(userInfo);
+			}
+		}
+		//批处理用户存储,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchAdd)){
+			userInfoService.saveBatch(batchAdd,1000);
+			for (UserInfo userInfo : batchAdd) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.ADD,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"新增成功"
+				);
+				userMap.put(userInfo.getOpenId(),userInfo);
+			}
+		}
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchUpdate)){
+			userInfoService.updateBatchById(batchUpdate,1000);
+			for (UserInfo userInfo : batchUpdate) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.UPDATE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"更新成功"
+				);
+			}
+		}
+		//遍历数据库，不存在的进行删除
+		for (String key : userMap.keySet()) {
+			UserInfo userInfo = userMap.get(key);
+			if (StringUtils.isEmpty(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+				continue;
+			}
+			//如果openid在数据库不存在，则进行删除
+			if (!allOpenIds.contains(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+			}
+		}
+
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchDelete)){
+			userInfoService.removeBatchByIds(batchDelete);
+			for (UserInfo userInfo : batchDelete) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.DELETE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"删除成功"
+				);
+			}
+		}
+	}
 
 
 	/**
@@ -341,7 +411,7 @@ public class DingtalkPullService extends AbstractSynchronizerService implements 
 	 * @param department
 	 * @return
 	 */
-	private Organization bulidOrgs(OapiV2DepartmentListsubResponse.DeptBaseResponse department){
+	private Organization buildOrgs(OapiV2DepartmentListsubResponse.DeptBaseResponse department){
 		Long id = getOrgIdByOpenDepartmentId(trackingUniqueId,ConstsSynchronizers.DINGDING,String.valueOf(department.getDeptId()));
 		Organization organization = new Organization();
 		if (id.intValue() != 0) {
@@ -371,19 +441,19 @@ public class DingtalkPullService extends AbstractSynchronizerService implements 
 	 * @param user
 	 * @return
 	 */
-	private UserInfo bulidUser(OapiV2UserListResponse.ListUserResponse user){
-		Long id = getUserIdByOpenDepartmentId(trackingUniqueId,ConstsSynchronizers.DINGDING,user.getUnionid());
+	private UserInfo buildUser(OapiV2UserListResponse.ListUserResponse user,UserInfo oldUserInfo){
 		UserInfo userInfo = new UserInfo();
-		if (id.intValue() != 0) {
-			userInfo.setId(id);
+		if (Objects.nonNull(oldUserInfo)) {
+			userInfo.setId(oldUserInfo.getId());
 			userInfo.setUpdateTime(new Date());
 			userInfo.setUpdateBy(0L);
 		} else {
 			userInfo.setCreateTime(new Date());
 			userInfo.setCreateBy(0L);
-			userInfo.setPassword(randomPassword(policyPasswordService));
 			userInfo.setBadPasswordCount(0);
 			userInfo.setIsLocked(0);
+			userInfo.setUpdateTime(new Date());
+			userInfo.setUpdateBy(0L);
 		}
 		userInfo.setOpenId(user.getUnionid());
 		userInfo.setObjectFrom(ConstsSynchronizers.DINGDING);

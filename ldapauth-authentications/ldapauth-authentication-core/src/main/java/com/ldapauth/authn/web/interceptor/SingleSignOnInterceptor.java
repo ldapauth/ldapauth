@@ -6,10 +6,10 @@ import com.ldapauth.authn.jwt.AuthTokenService;
 import com.ldapauth.authn.session.SessionManager;
 import com.ldapauth.authn.web.AuthorizationUtils;
 import com.ldapauth.configuration.ApplicationConfig;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import com.ldapauth.persistence.service.PermissionAuthenticationService;
-import com.ldapauth.pojo.entity.apps.ClientApps;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.Client;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import com.ldapauth.web.WebConstants;
 import com.ldapauth.web.WebContext;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class SingleSignOnInterceptor  implements AsyncHandlerInterceptor {
 	AuthTokenService authTokenService ;
 
     @Autowired
-	ClientAppsService appsService;
+	ClientService appsService;
 
 	/**
 	 * 鉴权
@@ -72,11 +72,11 @@ public class SingleSignOnInterceptor  implements AsyncHandlerInterceptor {
         //判断应用访问权限
         if(AuthorizationUtils.isAuthenticated()){
 	        _logger.debug("preHandle {}",request.getRequestURI());
-	        ClientApps app = (ClientApps) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
+	        Client app = (Client) WebContext.getAttribute(WebConstants.AUTHORIZE_SIGN_ON_APP);
 	        if(app == null) {
 	        	String requestURI = request.getRequestURI();
 	        	if(requestURI.contains("/authz/cas/login")) {//for CAS service
-					ClientAppsCASDetails casDetails = appsService.getAppDetails(request.getParameter("serivce"), true);
+					ClientCASDetails casDetails = appsService.getAppDetails(request.getParameter("serivce"), true);
 					if (Objects.nonNull(casDetails)) {
 						app = appsService.getById(casDetails.getAppId());
 					}

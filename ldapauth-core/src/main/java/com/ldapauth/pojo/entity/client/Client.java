@@ -1,4 +1,4 @@
-package com.ldapauth.pojo.entity.apps;
+package com.ldapauth.pojo.entity.client;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -6,10 +6,10 @@ import com.ldapauth.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@TableName(value = "lda_client_apps")
-@Schema(name="ClientApps",description ="客户端应用主表")
+@TableName(value = "lda_client")
+@Schema(name="Client",description ="客户端应用主表")
 @Data
-public class ClientApps extends BaseEntity {
+public class Client extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 

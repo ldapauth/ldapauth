@@ -1,4 +1,4 @@
-package com.ldapauth.pojo.entity.apps.details;
+package com.ldapauth.pojo.entity.client.details;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@TableName(value = "lda_client_apps_oidc_details")
-@Schema(name = "ClientAppsOIDCDetails", description = "OAUTH扩展表")
+@TableName(value = "lda_client_oidc_details")
+@Schema(name = "ClientOIDCDetails", description = "OAUTH扩展表")
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class ClientAppsOIDCDetails extends BaseEntity {
+public class ClientOIDCDetails extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

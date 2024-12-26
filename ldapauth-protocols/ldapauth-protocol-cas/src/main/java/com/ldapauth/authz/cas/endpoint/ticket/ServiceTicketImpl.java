@@ -1,6 +1,6 @@
 package com.ldapauth.authz.cas.endpoint.ticket;
 
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import com.ldapauth.authz.cas.endpoint.ticket.pgt.ProxyGrantingTicket;
 import org.springframework.security.core.Authentication;
@@ -56,7 +56,7 @@ public class ServiceTicketImpl extends AbstractTicket  implements ServiceTicket{
     /**
      * Instantiates a new service ticket impl.
      */
-    public ServiceTicketImpl(Authentication authentication, ClientAppsCASDetails casDetails) {
+    public ServiceTicketImpl(Authentication authentication, ClientCASDetails casDetails) {
         // exists for JPA purposes
     	this.authentication=authentication;
     	this.casDetails=casDetails;

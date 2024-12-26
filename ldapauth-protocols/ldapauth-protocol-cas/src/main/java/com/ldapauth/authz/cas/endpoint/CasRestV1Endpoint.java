@@ -11,7 +11,7 @@ import com.ldapauth.authz.cas.endpoint.ticket.ServiceTicketImpl;
 import com.ldapauth.authz.cas.endpoint.ticket.TicketGrantingTicketImpl;
 import com.ldapauth.authz.cas.endpoint.response.ServiceResponseBuilder;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import com.ldapauth.web.HttpResponseConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ public class CasRestV1Endpoint  extends CasBaseAuthorizeEndpoint{
             TicketGrantingTicketImpl ticketGrantingTicketImpl =
                     (TicketGrantingTicketImpl) casTicketGrantingTicketServices.get(ticketGrantingTicket);
 
-            ClientAppsCASDetails casDetails = appsService.getAppDetails(casService , true);
+            ClientCASDetails casDetails = appsService.getAppDetails(casService , true);
 
             ServiceTicketImpl serviceTicket=new ServiceTicketImpl(ticketGrantingTicketImpl.getAuthentication(),casDetails);
             String ticket = ticketServices.createTicket(serviceTicket);

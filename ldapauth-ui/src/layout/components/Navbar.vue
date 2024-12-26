@@ -86,7 +86,7 @@ function logout() {
     logoutApi().then(res => {
       if (res.success) {
         userStore.logOut().then(() => {
-          location.href = '/index';
+          location.href = '/console';
         })
       }
     });

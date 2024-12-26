@@ -3,13 +3,13 @@ package com.ldapauth.persistence.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.constants.ConstsCacheData;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import com.ldapauth.persistence.service.GroupResourceService;
 import com.ldapauth.persistence.service.PermissionAuthenticationService;
 import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.pojo.entity.Resource;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.ClientApps;
+import com.ldapauth.pojo.entity.client.Client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +39,7 @@ public class PermissionAuthenticationServiceImpl implements PermissionAuthentica
     GroupResourceService groupResourceService;
 
     @Autowired
-    ClientAppsService appsService;
+    ClientService appsService;
 
     @Autowired
     @Lazy
@@ -135,10 +135,10 @@ public class PermissionAuthenticationServiceImpl implements PermissionAuthentica
         List<Long> res = cacheService.getCacheObject(key);
         if (CollectionUtil.isEmpty(res)) {
             //从数据库读取
-            List<ClientApps> apps = appsService.myApps(userId);
+            List<Client> apps = appsService.myClient(userId);
             if (CollectionUtil.isNotEmpty(apps)) {
                 //提取所有应用ID标识
-                res = apps.stream().map(ClientApps::getId).collect(Collectors.toList());
+                res = apps.stream().map(Client::getId).collect(Collectors.toList());
                 //设置用户资源12小时
                 cacheService.setCacheObject(key,res,12, TimeUnit.HOURS);
             }

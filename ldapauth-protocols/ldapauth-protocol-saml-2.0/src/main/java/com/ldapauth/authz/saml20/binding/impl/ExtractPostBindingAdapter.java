@@ -5,7 +5,7 @@ import java.security.KeyStore;
 import javax.servlet.http.HttpServletRequest;
 
 import com.ldapauth.crypto.keystore.KeyStoreLoader;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
+import com.ldapauth.pojo.entity.client.details.ClientSAMLDetails;
 import org.apache.commons.lang.StringUtils;
 import com.ldapauth.authz.saml.common.TrustResolver;
 import com.ldapauth.authz.saml20.binding.ExtractBindingAdapter;
@@ -39,7 +39,7 @@ public class ExtractPostBindingAdapter implements ExtractBindingAdapter, Initial
 	protected KeyStoreLoader keyStoreLoader;
 	protected CredentialResolver credentialResolver;
 
-	protected ClientAppsSAMLDetails saml20Detail;
+	protected ClientSAMLDetails saml20Detail;
 
 
 	public ExtractPostBindingAdapter() {
@@ -126,11 +126,11 @@ public class ExtractPostBindingAdapter implements ExtractBindingAdapter, Initial
 	}
 
 	@Override
-	public void setSaml20Detail(ClientAppsSAMLDetails saml20Detail) {
+	public void setSaml20Detail(ClientSAMLDetails saml20Detail) {
 		this.saml20Detail=saml20Detail;
 	}
 
-	public ClientAppsSAMLDetails getSaml20Detail() {
+	public ClientSAMLDetails getSaml20Detail() {
 		return saml20Detail;
 	}
 

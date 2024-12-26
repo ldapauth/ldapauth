@@ -1,6 +1,8 @@
 package com.ldapauth.synchronizer.abstracts;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.persistence.service.*;
 import com.ldapauth.pojo.entity.*;
@@ -11,21 +13,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.naming.directory.DirContext;
-import java.util.Date;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 @Slf4j
 public abstract class AbstractSynchronizerService {
 
+    /**
+     * 定义一个线程池
+     */
+    ExecutorService executorService = new ThreadPoolExecutor(3, 100,
+            300L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>());
+
     protected Synchronizers synchronizer;
-    SynchronizersLogsService synchronizersLogsService;
-    CacheService cacheService;
-    UserInfoService userInfoService;
-    OrganizationService organizationService;
-
-    GroupService groupService;
-
+    protected SynchronizersLogsService synchronizersLogsService;
+    protected CacheService cacheService;
+    protected UserInfoService userInfoService;
+    protected OrganizationService organizationService;
+    protected GroupService groupService;
     public Synchronizers getSynchronizer() {
         return synchronizer;
     }
@@ -69,8 +75,14 @@ public abstract class AbstractSynchronizerService {
      * 插入历史记录
      */
     public void historyLogs(Object data,Long trackingUniqueId,Integer syncType, String syncActionType,Integer syncResultStatus,String syncMessage) {
+
         if (synchronizersLogsService == null) {
             synchronizersLogsService = SpringUtils.getBean(SynchronizersLogsService.class);
+        }
+        if (data instanceof UserInfo) {
+            data = (UserInfo) data;
+            ((UserInfo) data).setPassword(null);
+            ((UserInfo) data).setDecipherable(null);
         }
         SynchronizersLogs logs = new SynchronizersLogs();
         logs.setTrackingUniqueId(trackingUniqueId);
@@ -87,6 +99,11 @@ public abstract class AbstractSynchronizerService {
         logs.setSyncData(fdata);
         logs.setSyncType(syncType);
         logs.setSynchronizerId(synchronizer.getId());
+        //线程池入库
+        executorService.execute(() ->  sendLogs(logs));
+    }
+
+    private void sendLogs(SynchronizersLogs logs){
         synchronizersLogsService.save(logs);
     }
 
@@ -146,6 +163,30 @@ public abstract class AbstractSynchronizerService {
             return 0L;
         }
         return id;
+    }
+
+
+    /**
+     * 获取用户对象Map key用户ID，value=对象
+     * @param objectFrom 来源
+     * @return
+     */
+    public Map<String,UserInfo> getUserMapByObjectFrom(String objectFrom){
+        if (userInfoService == null) {
+            userInfoService = SpringUtils.getBean(UserInfoService.class);
+        }
+        Map<String,UserInfo> map = new HashMap<>();
+        LambdaQueryWrapper<UserInfo> lambdaQueryWrapper = new LambdaQueryWrapper();
+        lambdaQueryWrapper.eq(UserInfo::getObjectFrom, objectFrom);
+        List<UserInfo> userInfoList = userInfoService.list(lambdaQueryWrapper);
+        if (CollectionUtil.isNotEmpty(userInfoList)) {
+            for (UserInfo userInfo : userInfoList) {
+                if (StringUtils.isNotEmpty(userInfo.getOpenId())) {
+                    map.put(userInfo.getOpenId(), userInfo);
+                }
+            }
+        }
+        return map;
     }
 
     /**

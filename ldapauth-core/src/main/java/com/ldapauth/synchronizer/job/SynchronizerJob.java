@@ -2,19 +2,26 @@ package com.ldapauth.synchronizer.job;
 
 import com.ldapauth.persistence.service.SynchronizersService;
 import com.ldapauth.pojo.entity.Synchronizers;
-import com.ldapauth.web.WebContext;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.util.HashMap;
-import java.util.List;
 
-public class SynchronizerJob implements Job {
-	final static Logger _logger = LoggerFactory.getLogger(SynchronizerJob.class);
+public class SynchronizerJob implements Job, ApplicationContextAware {
+    final static Logger _logger = LoggerFactory.getLogger(SynchronizerJob.class);
 
-	SynchronizersService synchronizersService;
+    SynchronizersService synchronizersService;
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     public static class JOBSTATUS{
         public static int STOP = 0;
@@ -59,7 +66,7 @@ public class SynchronizerJob implements Job {
     public Synchronizers readSynchronizer(JobExecutionContext context) {
         Synchronizers jobSynchronizer = (Synchronizers)context.getMergedJobDataMap().get("synchronizer");
         if (synchronizersService == null) {
-            synchronizersService = (SynchronizersService)WebContext.getBean("synchronizersService");
+            synchronizersService = applicationContext.getBean(SynchronizersService.class);
         }
         //read synchronizer by id from database
         Synchronizers synchronizer = synchronizersService.getById(jobSynchronizer.getId());

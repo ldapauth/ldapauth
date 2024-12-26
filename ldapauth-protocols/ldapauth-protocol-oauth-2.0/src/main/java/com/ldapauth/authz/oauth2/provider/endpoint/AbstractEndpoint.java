@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ldapauth.configuration.ApplicationConfig;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.ldapauth.authz.oauth2.provider.ClientDetailsService;
@@ -61,7 +61,7 @@ public class AbstractEndpoint implements InitializingBean {
 	AuthenticationManager authenticationManager;
 
 	@Autowired
-    protected ClientAppsService appsService;
+    protected ClientService appsService;
 
 	@Autowired
     @Qualifier("applicationConfig")

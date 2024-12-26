@@ -3,6 +3,7 @@ package com.ldapauth.synchronizer.ldap.pull;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
 import com.ldapauth.constants.ConstsSynchronizers;
+import com.ldapauth.crypto.password.PasswordReciprocal;
 import com.ldapauth.persistence.service.GroupMemberService;
 import com.ldapauth.persistence.service.GroupService;
 import com.ldapauth.persistence.service.OrganizationService;
@@ -23,6 +24,7 @@ import com.ldapauth.util.LdapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
@@ -54,6 +56,10 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 	Long trackingUniqueId = 0L;
 
 	Map<String, String> entryUUIDMap = null;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
 	/**
 	 * 同步入口
 	 */
@@ -155,7 +161,7 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 					return order1 - order2;
 				});
 				for (LdapOrg ldapOrg : orgsList) {
-					Organization organization = bulidOrgs(ldapOrg);
+					Organization organization = buildOrgs(ldapOrg);
 					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
 					if (Objects.nonNull(organization.getId()) && organization.getId().intValue() != 0) {
 						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
@@ -237,35 +243,107 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 				}
 			}
 			if (CollectionUtil.isNotEmpty(userList)) {
-				for (LdapUser user : userList) {
-					UserInfo userInfo = bulidUser(user);
-					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
-					if (Objects.nonNull(userInfo.getId()) && userInfo.getId().intValue() != 0) {
-						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
-					}
-					//入库存储
-					boolean flag = userInfoService.saveOrUpdate(userInfo);
-					Integer success = ConstsSynchronizers.SyncResultStatus.SUCCESS;
-					String message = "成功";
-					if(!flag) {
-						success = ConstsSynchronizers.SyncResultStatus.FAIL;
-						message = "失败";
-					}
-					//记录日志
-					super.historyLogs(
-							userInfo, trackingUniqueId,
-							ConstsSynchronizers.SyncType.USER,
-							syncActionType,
-							success,
-							message
-					);
-				}
-
+				Map<String,UserInfo> userMap = getUserMapByObjectFrom(ConstsSynchronizers.OPEN_LDAP);
+				//批处理用户
+				batchUser(userList,userMap);
 			}
 		} catch (Exception e) {
 			log.error("同步LDAP异常");
 		}
 	}
+
+	/**
+	 * 批处理用户，批量更新或者新增
+	 * @param userList
+	 * @param userMap
+	 */
+	private void batchUser(List<LdapUser> userList, Map<String,UserInfo> userMap){
+		List<UserInfo> batchAdd = new ArrayList<>();
+		List<UserInfo> batchUpdate = new ArrayList<>();
+		//定义需要删除的用户集合,根据openid比对数据库记录
+		List<UserInfo> batchDelete = new ArrayList<>();
+		List<String> allOpenIds = new ArrayList<>();
+		String defPassword = ConstsSynchronizers.DEF_PASSWORD;
+		String password = passwordEncoder.encode(defPassword);
+		String decipherable = PasswordReciprocal.getInstance().encode(defPassword);
+
+		for (LdapUser user : userList) {
+			allOpenIds.add(user.getEntryUUID());
+			//判断用户是否存在
+			UserInfo oldUserInfo = userMap.get(user.getEntryUUID());
+			UserInfo userInfo = buildUser(user,oldUserInfo);
+			if (Objects.nonNull(oldUserInfo)) {
+				batchUpdate.add(userInfo);
+			} else {
+				userInfo.setPassword(password);
+				userInfo.setDecipherable(decipherable);
+				userInfo.setPasswordLastSetTime(new Date());
+				userInfo.setBadPasswordCount(0);
+				batchAdd.add(userInfo);
+			}
+		}
+		//批处理用户存储,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchAdd)){
+			userInfoService.saveBatch(batchAdd,1000);
+			for (UserInfo userInfo : batchAdd) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.ADD,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"新增成功"
+				);
+				userMap.put(userInfo.getOpenId(),userInfo);
+			}
+		}
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchUpdate)){
+			userInfoService.updateBatchById(batchUpdate,1000);
+			for (UserInfo userInfo : batchUpdate) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.UPDATE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"更新成功"
+				);
+			}
+		}
+		//遍历数据库，不存在的进行删除
+		for (String key : userMap.keySet()) {
+			UserInfo userInfo = userMap.get(key);
+			if (StringUtils.isEmpty(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+				continue;
+			}
+			//如果openid在数据库不存在，则进行删除
+			if (!allOpenIds.contains(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+			}
+		}
+
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchDelete)){
+			userInfoService.removeBatchByIds(batchDelete);
+			for (UserInfo userInfo : batchDelete) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.DELETE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"删除成功"
+				);
+			}
+		}
+	}
+
+
 
 	/**
 	 * 同步组
@@ -317,7 +395,7 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 			}
 			if (CollectionUtil.isNotEmpty(groupList)) {
 				for (LdapGroup ldapGroup : groupList) {
-					Group group = bulidGroup(ldapGroup);
+					Group group = buildGroup(ldapGroup);
 					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
 					if (Objects.nonNull(group.getId()) && group.getId().intValue() != 0) {
 						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
@@ -371,7 +449,7 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 	 * @param department
 	 * @return
 	 */
-	private Organization bulidOrgs(LdapOrg department){
+	private Organization buildOrgs(LdapOrg department){
 		Long id = getOrgIdByLdapId(trackingUniqueId,department.getEntryUUID());
 		Organization organization = new Organization();
 		if (id.intValue() != 0) {
@@ -398,23 +476,22 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 	 * @param user
 	 * @return
 	 */
-	private UserInfo bulidUser(LdapUser user){
-		Long id = getUserIdByLdapId(trackingUniqueId,user.getEntryUUID());
+	private UserInfo buildUser(LdapUser user,UserInfo oldUserInfo){
 		UserInfo userInfo = new UserInfo();
-		if (id.intValue() != 0) {
-			userInfo.setId(id);
+		if (Objects.nonNull(oldUserInfo)) {
+			userInfo.setId(oldUserInfo.getId());
 			userInfo.setUpdateTime(new Date());
 			userInfo.setUpdateBy(0L);
 		} else {
 			userInfo.setCreateTime(new Date());
 			userInfo.setCreateBy(0L);
-			userInfo.setPassword("Ldapauth@123456");
 			userInfo.setBadPasswordCount(0);
 			userInfo.setIsLocked(0);
-			userInfo.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
-			userInfo.setOpenId(user.getEntryUUID());
+			userInfo.setUpdateTime(new Date());
+			userInfo.setUpdateBy(0L);
 		}
-
+		userInfo.setOpenId(user.getEntryUUID());
+		userInfo.setObjectFrom(ConstsSynchronizers.OPEN_LDAP);
 		userInfo.setUsername(user.getUid());
 		userInfo.setDisplayName(user.getDisplayName());
 		userInfo.setMobile(handLeMobile(user.getMobile()));
@@ -437,7 +514,7 @@ public class LdapPullService extends AbstractSynchronizerService implements ISyn
 	 * @param ldapGroup
 	 * @return
 	 */
-	private Group bulidGroup(LdapGroup ldapGroup){
+	private Group buildGroup(LdapGroup ldapGroup){
 		Long id = getGroupIdByLdapId(trackingUniqueId,ldapGroup.getEntryUUID());
 		Group group = new Group();
 		if (id.intValue() != 0) {

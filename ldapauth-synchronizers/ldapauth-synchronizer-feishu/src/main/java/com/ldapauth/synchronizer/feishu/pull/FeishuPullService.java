@@ -9,6 +9,7 @@ import com.lark.oapi.core.response.AppAccessTokenResp;
 import com.lark.oapi.service.contact.v3.model.*;
 import com.ldapauth.cache.CacheService;
 import com.ldapauth.constants.ConstsSynchronizers;
+import com.ldapauth.crypto.password.PasswordReciprocal;
 import com.ldapauth.exception.BusinessException;
 import com.ldapauth.persistence.service.OrganizationService;
 import com.ldapauth.persistence.service.PolicyPasswordService;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -45,7 +47,8 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 	@Autowired
 	IdentifierGenerator identifierGenerator;
 
-
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	Long trackingUniqueId = 0L;
 
 	@Autowired
@@ -105,7 +108,7 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 				//提取id集合
 				resultIds = listDept.stream().map(Department::getOpenDepartmentId).collect(Collectors.toList());
 				for (Department department : listDept) {
-					Organization organization = bulidOrgs(department);
+					Organization organization = buildOrgs(department);
 					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
 					if (Objects.nonNull(organization.getId()) && organization.getId().intValue() != 0) {
 						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
@@ -159,6 +162,7 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 	public void syncUser(List<String> orgList){
 		Synchronizers synchronizers = getSynchronizer();
 		Client client = getClient();
+
 		try {
 			// 发起token请求
 			AppAccessTokenResp tokenResp = client.ext().getAppAccessTokenBySelfBuiltApp(
@@ -199,38 +203,9 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 				resultUser= resultUser.stream().collect(
 						Collectors.toMap(User::getOpenId, fruit -> fruit,
 								(existing, replacement) -> existing)).values().stream().collect(Collectors.toList());
-
-				for (User user : resultUser) {
-					if (StringUtils.isNotEmpty(user.getMobile())) {
-						user.setMobile(handLeMobile(user.getMobile()));
-					}
-					UserInfo userInfo = bulidUser(user);
-					String syncActionType = ConstsSynchronizers.SyncActionType.ADD;
-					if (Objects.nonNull(userInfo.getId()) && userInfo.getId().intValue() != 0) {
-						syncActionType = ConstsSynchronizers.SyncActionType.UPDATE;
-					}
-					boolean flag = false;
-					String message = "成功";
-					Integer success = ConstsSynchronizers.SyncResultStatus.SUCCESS;
-					try {
-						//入库存储
-						flag = userInfoService.saveOrUpdate(userInfo);
-					} catch (BusinessException e) {
-						flag = false;
-						message = e.getMessage();
-					}
-					if(!flag) {
-						success = ConstsSynchronizers.SyncResultStatus.FAIL;
-					}
-					//记录日志
-					super.historyLogs(
-							userInfo, trackingUniqueId,
-							ConstsSynchronizers.SyncType.USER,
-							syncActionType,
-							success,
-							message
-					);
-				}
+				Map<String,UserInfo> userMap = getUserMapByObjectFrom(ConstsSynchronizers.FEISHU);
+				//批处理用户
+				batchUser(resultUser,userMap);
 			}
 		} catch (Exception e){
 			log.error("error",e);
@@ -238,6 +213,96 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 				throw new BusinessException(((BusinessException) e).getCode(),e.getMessage());
 			} else {
 				throw new BusinessException(500,e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * 批处理用户，批量更新或者新增
+	 * @param resultUser
+	 * @param userMap
+	 */
+	private void batchUser(List<User> resultUser,Map<String,UserInfo> userMap){
+		List<UserInfo> batchAdd = new ArrayList<>();
+		List<UserInfo> batchUpdate = new ArrayList<>();
+		//定义需要删除的用户集合,根据openid比对数据库记录
+		List<UserInfo> batchDelete = new ArrayList<>();
+		List<String> allOpenIds = new ArrayList<>();
+		String defPassword = ConstsSynchronizers.DEF_PASSWORD;
+		String password = passwordEncoder.encode(defPassword);
+		String decipherable = PasswordReciprocal.getInstance().encode(defPassword);
+		for (User user : resultUser) {
+			allOpenIds.add(user.getOpenId());
+			//判断用户是否存在
+			UserInfo oldUserInfo = userMap.get(user.getOpenId());
+			UserInfo userInfo = buildUser(user,oldUserInfo);
+			if (Objects.nonNull(oldUserInfo)) {
+				batchUpdate.add(userInfo);
+			} else {
+				userInfo.setPassword(password);
+				userInfo.setDecipherable(decipherable);
+				userInfo.setPasswordLastSetTime(new Date());
+				userInfo.setBadPasswordCount(0);
+				batchAdd.add(userInfo);
+			}
+		}
+		//批处理用户存储,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchAdd)){
+			userInfoService.saveBatch(batchAdd,1000);
+			for (UserInfo userInfo : batchAdd) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.ADD,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"新增成功"
+				);
+				userMap.put(userInfo.getOpenId(),userInfo);
+			}
+		}
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchUpdate)){
+			userInfoService.updateBatchById(batchUpdate,1000);
+			for (UserInfo userInfo : batchUpdate) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.UPDATE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"更新成功"
+				);
+			}
+		}
+		//遍历数据库，不存在的进行删除
+		for (String key : userMap.keySet()) {
+			UserInfo userInfo = userMap.get(key);
+			if (StringUtils.isEmpty(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+				continue;
+			}
+			//如果openid在数据库不存在，则进行删除
+			if (!allOpenIds.contains(userInfo.getOpenId())) {
+				batchDelete.add(userInfo);
+			}
+		}
+
+		//批处理用户,1000提交一次
+		if (CollectionUtil.isNotEmpty(batchDelete)){
+			userInfoService.removeBatchByIds(batchDelete);
+			for (UserInfo userInfo : batchDelete) {
+				//记录日志
+				super.historyLogs(
+						userInfo,
+						trackingUniqueId,
+						ConstsSynchronizers.SyncType.USER,
+						ConstsSynchronizers.SyncActionType.DELETE,
+						ConstsSynchronizers.SyncResultStatus.SUCCESS,
+						"删除成功"
+				);
 			}
 		}
 	}
@@ -324,7 +389,7 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 	 * @param department
 	 * @return
 	 */
-	private Organization bulidOrgs(Department department){
+	private Organization buildOrgs(Department department){
 		Long id = getOrgIdByOpenDepartmentId(trackingUniqueId,ConstsSynchronizers.FEISHU,department.getOpenDepartmentId());
 		Organization organization = new Organization();
 		if (id.intValue() != 0) {
@@ -356,22 +421,24 @@ public class FeishuPullService extends AbstractSynchronizerService implements IS
 	/**
 	 * 构建系统组织对象
 	 * @param user
+	 * @param oldUserInfo 数据库用户
 	 * @return
 	 */
-	private UserInfo bulidUser(User user){
-		Long id = getUserIdByOpenDepartmentId(trackingUniqueId,ConstsSynchronizers.FEISHU,user.getOpenId());
+	private UserInfo buildUser(User user,UserInfo oldUserInfo ){
 		UserInfo userInfo = new UserInfo();
-		if (id.intValue() != 0) {
-			userInfo.setId(id);
+		if (Objects.nonNull(oldUserInfo)) {
+			userInfo.setId(oldUserInfo.getId());
 			userInfo.setUpdateTime(new Date());
 			userInfo.setUpdateBy(0L);
 		} else {
 			userInfo.setCreateTime(new Date());
 			userInfo.setCreateBy(0L);
-			userInfo.setPassword(randomPassword(policyPasswordService));
+			userInfo.setUpdateTime(new Date());
+			userInfo.setUpdateBy(0L);
 			userInfo.setBadPasswordCount(0);
 			userInfo.setIsLocked(0);
 		}
+		user.setMobile(handLeMobile(user.getMobile()));
 		userInfo.setOpenId(user.getOpenId());
 		userInfo.setObjectFrom(ConstsSynchronizers.FEISHU);
 		userInfo.setUsername(user.getOpenId());

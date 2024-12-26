@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ldapauth.authn.SignPrincipal;
 import com.ldapauth.authz.endpoint.adapter.AbstractAuthorizeAdapter;
 import com.ldapauth.authz.oauth2.domain.ClientDetails;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.util.JsonUtils;
 import com.ldapauth.util.RequestTokenUtils;
@@ -46,7 +46,7 @@ public class UserInfoEndpoint {
 	private UserInfoService userInfoService;
 
 	@Autowired
-	protected ClientAppsService appsService;
+	protected ClientService appsService;
 
     @Autowired
     protected HttpResponseAdapter httpResponseAdapter;

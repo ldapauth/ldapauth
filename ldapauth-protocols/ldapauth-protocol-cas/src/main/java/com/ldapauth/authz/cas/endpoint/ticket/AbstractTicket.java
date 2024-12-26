@@ -1,6 +1,6 @@
 package com.ldapauth.authz.cas.endpoint.ticket;
 
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
@@ -55,7 +55,7 @@ public abstract class AbstractTicket implements Ticket {
 
     protected Authentication authentication;
 
-    protected ClientAppsCASDetails casDetails;
+    protected ClientCASDetails casDetails;
     /**
      * Instantiates a new abstract ticket.
      */
@@ -131,7 +131,7 @@ public abstract class AbstractTicket implements Ticket {
     }
 
 	@Override
-	public ClientAppsCASDetails getCasDetails() {
+	public ClientCASDetails getCasDetails() {
 		return this.casDetails;
 	}
 

@@ -1,6 +1,6 @@
 package com.ldapauth.authz.cas.endpoint.ticket;
 
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -32,7 +32,7 @@ public class ProxyTicketImpl extends ServiceTicketImpl implements Ticket {
 
     }
 
-    public ProxyTicketImpl(Authentication authentication,  ClientAppsCASDetails casDetails) {
+    public ProxyTicketImpl(Authentication authentication,  ClientCASDetails casDetails) {
     	this.authentication=authentication;
     	this.casDetails=casDetails;
     }

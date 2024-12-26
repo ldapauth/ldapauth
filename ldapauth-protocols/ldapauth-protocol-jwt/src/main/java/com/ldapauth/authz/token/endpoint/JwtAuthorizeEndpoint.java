@@ -9,8 +9,8 @@ import com.ldapauth.configuration.ApplicationConfig;
 import com.ldapauth.constants.ContentType;
 import com.ldapauth.crypto.jose.keystore.JWKSetKeyStore;
 import com.ldapauth.exception.BusinessException;
-import com.ldapauth.pojo.entity.apps.ClientApps;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsJWTDetails;
+import com.ldapauth.pojo.entity.client.Client;
+import com.ldapauth.pojo.entity.client.details.ClientJWTDetails;
 import org.apache.commons.lang3.StringUtils;
 import com.ldapauth.authz.jwt.endpoint.adapter.JwtAdapter;
 import org.slf4j.Logger;
@@ -49,8 +49,8 @@ public class JwtAuthorizeEndpoint  extends AuthorizeBaseEndpoint {
 			HttpServletResponse response,
 			@PathVariable("id") String appId){
 		ModelAndView modelAndView=new ModelAndView();
-		ClientApps apps = getApp(Long.valueOf(appId));
-		ClientAppsJWTDetails jwtDetails = appsService.getAppsJwtDetails(Long.valueOf(appId));
+		Client apps = getApp(Long.valueOf(appId));
+		ClientJWTDetails jwtDetails = appsService.getAppsJwtDetails(Long.valueOf(appId));
 		if(Objects.isNull(apps)) {
 			throw new BusinessException(HttpStatus.BAD_REQUEST.value(), "无法查询应用["+appId+"]");
 		}
@@ -82,8 +82,8 @@ public class JwtAuthorizeEndpoint  extends AuthorizeBaseEndpoint {
 			HttpServletResponse response,
 			@PathVariable("appid") String appId,
 			@PathVariable("mediaType") String mediaType) {
-		ClientAppsJWTDetails jwtDetails = appsService.getAppsJwtDetails(Long.valueOf(appId));
-		ClientApps apps = getApp(Long.valueOf(appId));
+		ClientJWTDetails jwtDetails = appsService.getAppsJwtDetails(Long.valueOf(appId));
+		Client apps = getApp(Long.valueOf(appId));
 		if(Objects.isNull(apps)) {
 			throw new BusinessException(HttpStatus.BAD_REQUEST.value(), "无法查询应用["+appId+"]");
 		}

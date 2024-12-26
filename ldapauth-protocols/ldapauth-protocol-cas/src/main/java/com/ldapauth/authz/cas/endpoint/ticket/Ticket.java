@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -79,7 +79,7 @@ public interface Ticket extends Serializable, Comparable<Ticket> {
 
     ZonedDateTime getPreviousTimeUsed();
 
-    ClientAppsCASDetails getCasDetails();
+    ClientCASDetails getCasDetails();
 
 
 }

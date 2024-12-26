@@ -1,7 +1,7 @@
 package com.ldapauth.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
+import com.ldapauth.pojo.entity.client.details.ClientOIDCDetails;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  * Date:2024-07-11
  */
 @Mapper
-public interface AppsSamlDetailsMapper extends BaseMapper<ClientAppsSAMLDetails> {
+public interface ClientOIDCDetailsMapper extends BaseMapper<ClientOIDCDetails> {
 }

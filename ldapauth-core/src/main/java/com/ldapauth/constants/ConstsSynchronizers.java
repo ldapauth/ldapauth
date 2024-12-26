@@ -13,6 +13,7 @@ public final class ConstsSynchronizers {
 
     public static final String ACTIVEDIRECTORY = "activedirectory";
 
+    public static final String DEF_PASSWORD = "Ldapauth@888";
     /**
      * 定义API接口前缀
      */

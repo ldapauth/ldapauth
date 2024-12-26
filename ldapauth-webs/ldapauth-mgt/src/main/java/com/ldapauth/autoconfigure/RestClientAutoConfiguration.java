@@ -2,7 +2,7 @@ package com.ldapauth.autoconfigure;
 
 import com.ldapauth.authz.oauth2.provider.client.ClientDetailsUserDetailsService;
 import com.ldapauth.authz.oauth2.provider.client.RestClientDetailsService;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +28,7 @@ public class RestClientAutoConfiguration {
      */
     @Bean(name = "restProviderManager")
     public ProviderManager restProviderManager(
-            ClientAppsService appsService,
+            ClientService appsService,
             @Qualifier("passwordReciprocal")
             PasswordEncoder passwordReciprocal
             ) {

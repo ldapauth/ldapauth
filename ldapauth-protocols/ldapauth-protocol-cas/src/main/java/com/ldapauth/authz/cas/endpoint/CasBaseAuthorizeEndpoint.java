@@ -3,7 +3,7 @@ package com.ldapauth.authz.cas.endpoint;
 import com.ldapauth.authn.session.SessionManager;
 import com.ldapauth.authz.cas.endpoint.ticket.TicketServices;
 import com.ldapauth.authz.endpoint.AuthorizeBaseEndpoint;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import com.ldapauth.persistence.service.UserInfoService;
 import com.ldapauth.web.HttpRequestAdapter;
 import com.ldapauth.web.HttpResponseAdapter;
@@ -17,7 +17,7 @@ public class CasBaseAuthorizeEndpoint  extends AuthorizeBaseEndpoint {
     final static Logger _logger = LoggerFactory.getLogger(CasBaseAuthorizeEndpoint.class);
 
     @Autowired
-    protected ClientAppsService appsService;
+    protected ClientService appsService;
 
     @Autowired
     protected UserInfoService userInfoService;

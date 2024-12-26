@@ -1,4 +1,4 @@
-package com.ldapauth.pojo.entity.apps.details;
+package com.ldapauth.pojo.entity.client.details;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -9,11 +9,11 @@ import lombok.EqualsAndHashCode;
 
 import java.security.cert.X509Certificate;
 
-@TableName(value = "lda_client_apps_saml_details")
-@Schema(name = "ClientAppsSAMLDetails", description = "SAML扩展表")
+@TableName(value = "lda_client_saml_details")
+@Schema(name = "ClientSAMLDetails", description = "SAML扩展表")
 @EqualsAndHashCode(callSuper = false)
 @Data
-public class ClientAppsSAMLDetails extends BaseEntity {
+public class ClientSAMLDetails extends BaseEntity {
 
 	private static final long serialVersionUID = 1L;
 

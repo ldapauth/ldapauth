@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import com.ldapauth.persistence.service.SynchronizersService;
 import com.ldapauth.pojo.entity.Synchronizers;
 import com.ldapauth.synchronizer.job.SynchronizerJob;
-import com.ldapauth.util.ActiveDirectoryExtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
@@ -76,7 +75,7 @@ public class SynchronizerAutoConfiguration   implements InitializingBean {
 	public List<Synchronizers> querySynchronizers(SynchronizersService  synchronizersService) {
 		List<Synchronizers> synchronizersList =  synchronizersService.list();
 		//过滤禁用的任务
-		synchronizersList = synchronizersList.stream().filter(a->a.getStatus().intValue() != 0).collect(Collectors.toList());
+		synchronizersList = synchronizersList.stream().filter(a->a.getStatus().intValue() == 0).collect(Collectors.toList());
 		return synchronizersList;
 	}
 

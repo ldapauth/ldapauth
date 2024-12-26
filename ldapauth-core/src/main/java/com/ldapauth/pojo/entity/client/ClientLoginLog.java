@@ -1,4 +1,4 @@
-package com.ldapauth.pojo.entity.apps;
+package com.ldapauth.pojo.entity.client;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -14,12 +14,12 @@ import java.util.Date;
  * @Author : 15829 //作者
  * @Date: 2024/7/23  10:10
  */
-@TableName(value = "lda_client_apps_login_log")
-@Schema(name="ClientAppsLoginLog",description ="访问应用日志表")
+@TableName(value = "lda_client_login_log")
+@Schema(name="ClientLoginLog",description ="访问应用日志表")
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ClientAppsLoginLog {
+public class ClientLoginLog {
 
     @Schema(description = "日志ID")
     Long id;

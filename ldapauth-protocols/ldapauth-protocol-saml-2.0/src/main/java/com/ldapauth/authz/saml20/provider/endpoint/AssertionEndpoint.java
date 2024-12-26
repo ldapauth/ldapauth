@@ -11,7 +11,7 @@ import com.ldapauth.authz.saml.common.EndpointGenerator;
 import com.ldapauth.authz.saml20.binding.BindingAdapter;
 import com.ldapauth.authz.saml20.provider.xml.AuthnResponseGenerator;
 import com.ldapauth.pojo.entity.UserInfo;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
+import com.ldapauth.pojo.entity.client.details.ClientSAMLDetails;
 import com.ldapauth.web.WebConstants;
 import org.opensaml.saml2.core.Response;
 import org.opensaml.saml2.metadata.Endpoint;
@@ -48,7 +48,7 @@ public class AssertionEndpoint {
 		bindingAdapter = (BindingAdapter) request.getSession().getAttribute(
 		        WebConstants.AUTHORIZE_SIGN_ON_APP_SAMLV20_ADAPTER);
 		logger.debug("saml20 assertion get session samlv20Adapter "+bindingAdapter);
-		ClientAppsSAMLDetails saml20Details = bindingAdapter.getSaml20Details();
+		ClientSAMLDetails saml20Details = bindingAdapter.getSaml20Details();
 		AuthnRequestInfo authnRequestInfo = bindingAdapter.getAuthnRequestInfo();
 
 		if (authnRequestInfo == null) {

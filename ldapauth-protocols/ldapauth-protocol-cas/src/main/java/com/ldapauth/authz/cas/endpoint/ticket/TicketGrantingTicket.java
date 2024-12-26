@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.ldapauth.pojo.entity.apps.details.ClientAppsCASDetails;
+import com.ldapauth.pojo.entity.client.details.ClientCASDetails;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -44,7 +44,7 @@ public interface TicketGrantingTicket extends Ticket {
      * @return the service ticket granted to a specific service for the principal of the TicketGrantingTicket
      */
     ServiceTicket grantServiceTicket(String id, Service service,
-                                     ClientAppsCASDetails casDetails,
+                                     ClientCASDetails casDetails,
                                      ExpirationPolicy expirationPolicy,
                                      boolean credentialProvided,
                                      boolean onlyTrackMostRecentSession);

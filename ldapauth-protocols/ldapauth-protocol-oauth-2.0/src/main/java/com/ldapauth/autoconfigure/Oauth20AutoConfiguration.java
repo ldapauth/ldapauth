@@ -24,7 +24,7 @@ import com.ldapauth.crypto.jose.keystore.JWKSetKeyStore;
 import com.ldapauth.crypto.jwt.encryption.service.impl.DefaultJwtEncryptionAndDecryptionService;
 import com.ldapauth.crypto.jwt.signer.service.impl.DefaultJwtSigningAndValidationService;
 import com.ldapauth.persistence.repository.LoginRepository;
-import com.ldapauth.persistence.service.ClientAppsService;
+import com.ldapauth.persistence.service.ClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -192,7 +192,7 @@ public class Oauth20AutoConfiguration implements InitializingBean {
      * @return oauth20JdbcClientDetailsService
      */
     @Bean(name = "oauth20JdbcClientDetailsService")
-    public JdbcClientDetailsService jdbcClientDetailsService(ClientAppsService appsService) {
+    public JdbcClientDetailsService jdbcClientDetailsService(ClientService appsService) {
         JdbcClientDetailsService clientDetailsService = new JdbcClientDetailsService(appsService);
         //clientDetailsService.setPasswordEncoder(passwordReciprocal);
         _logger.debug("OAuth 2 ClientDetails Service init.");

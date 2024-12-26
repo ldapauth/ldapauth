@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ldapauth.crypto.keystore.KeyStoreLoader;
 import com.ldapauth.crypto.keystore.KeyStoreUtil;
-import com.ldapauth.pojo.entity.apps.details.ClientAppsSAMLDetails;
+import com.ldapauth.pojo.entity.client.details.ClientSAMLDetails;
 import org.apache.commons.lang.Validate;
 import org.apache.velocity.app.VelocityEngine;
 import com.ldapauth.authz.saml.common.AuthnRequestInfo;
@@ -209,7 +209,7 @@ public class PostBindingAdapter implements BindingAdapter, InitializingBean{
 	}
 
 	@Override
-	public ClientAppsSAMLDetails getSaml20Details() {
+	public ClientSAMLDetails getSaml20Details() {
 		return extractBindingAdapter.getSaml20Detail();
 	}
 }
